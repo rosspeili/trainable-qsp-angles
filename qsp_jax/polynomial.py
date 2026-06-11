@@ -75,3 +75,25 @@ def target_poly(x, degree: int = DEFAULT_DEGREE):
 def monomial_coeffs_numpy(degree: int = DEFAULT_DEGREE) -> np.ndarray:
     """Low-to-high monomial coefficients for PennyLane ``poly_to_angles``."""
     return chebyshev_sin_monomial_coeffs(degree)
+
+
+def chebyshev_sin_cheb_coeffs(degree: int = DEFAULT_DEGREE) -> np.ndarray:
+    """
+    Chebyshev-basis coefficients [c0, c1, ..., c_degree] for the sin target.
+
+    Used by standalone analytic solvers (e.g. pyqsp / Chao et al.) that expect
+    ``numpy.polynomial.chebyshev.Chebyshev`` input rather than monomial form.
+    """
+    if degree < 1 or degree % 2 == 0:
+        raise ValueError(f"degree must be a positive odd integer, got {degree}")
+
+    if degree == DEFAULT_DEGREE:
+        coeffs = np.zeros(degree + 1, dtype=np.float64)
+        coeffs[1] = CHEB_COEFFS_D5[0]
+        coeffs[3] = CHEB_COEFFS_D5[1]
+        coeffs[5] = CHEB_COEFFS_D5[2]
+        return coeffs
+
+    xs = np.linspace(-1.0, 1.0, 2000)
+    ys = np.sin(xs)
+    return np.array(cheb.chebfit(xs, ys, degree), dtype=np.float64)

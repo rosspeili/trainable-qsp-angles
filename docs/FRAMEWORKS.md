@@ -35,7 +35,7 @@ If those hold, the same loss landscape and training protocol apply.
 | **TensorFlow / Keras pipelines** | Existing TF training graphs, TF Data, TPU adjacency | [TensorFlow Quantum](https://github.com/tensorflow/quantum) (Cirq-backed); different AD path than JAX |
 | **PyTorch-native VQAs** | `torch.autograd` end-to-end with classical co-training | Custom simulator or `torch`-compatible backends; re-implement flat QSP in Torch (not in repo yet) |
 | **Chemistry / fermionic Hamiltonians → block encoding** | OpenFermion focuses on fermionic operators and chemistry models, useful upstream of QSVT | [OpenFermion](https://github.com/quantumlib/OpenFermion) + downstream QSP/QSVT (PennyLane, Qiskit, or custom) |
-| **Machine-precision analytic angles only** | No quantum SDK required for the classical solve | [Chao et al.](https://arxiv.org/abs/2003.02831) reference implementation; PennyLane `poly_to_angles` is one convenient wrapper |
+| **Machine-precision analytic angles only** | No quantum SDK required for the classical solve | [Chao et al.](https://arxiv.org/abs/2003.02831) via **`pyqsp`** in `qsp_jax/chao_baseline.py`; PennyLane `poly_to_angles` is a separate convenience wrapper |
 | **Maximum sim speed (CPU/GPU)** | Device-specific kernels | PennyLane-Lightning, Qiskit Aer MPS/GPU, or dedicated tensor-network sims |
 | **Minimal dependencies / pedagogy** | Teach QSP without a full QML stack | NumPy + explicit unitaries (slow but transparent); validate against this repo’s results |
 
@@ -48,7 +48,7 @@ If those hold, the same loss landscape and training protocol apply.
 PennyLane is often described as a **differentiable front-end** that can delegate execution:
 
 - **Same training code, different device:** swap `default.qubit` for a Qiskit, Cirq, or Lightning device when you need fidelity to a target platform or faster simulation.
-- **Analytic angles elsewhere, train here:** phases from Chao et al. or another solver can still be evaluated in our flat circuit for apples-to-apples MSE—convention alignment matters more than which library produced the angles.
+- **Analytic angles elsewhere, train here:** phases from Chao et al. (`qsp_jax/chao_baseline.py`) or PennyLane `poly_to_angles` can be evaluated in our flat circuit for apples-to-apples MSE — convention alignment matters more than which library produced the angles.
 
 The documented **`qml.QSVT` + JAX tracing issue** is a **template-capture pitfall** observed in PennyLane. Analogous bugs can appear in any system that builds operator objects from concrete NumPy values before autodiff sees them. The fix—**inline primitives with tracer-valued parameters**—transfers directly to Qiskit (`QuantumCircuit` with `ParameterExpression`), Cirq (`sympy`/parameterized gates), or TFQ.
 
@@ -60,7 +60,7 @@ The documented **`qml.QSVT` + JAX tracing issue** is a **template-capture pitfal
 |-------|---------|--------|
 | Rebuild flat QSP in **Qiskit** (`Parameter` phases) + JAX via `qiskit-jax` or manual unitary | Confirm learned phases match PennyLane sim | Medium |
 | Same circuit in **Cirq** | Google-stack validation | Medium |
-| **Standalone Chao solver** baseline (no `poly_to_angles`) | Fair analytic comparison independent of PennyLane | Low–medium |
+| **Standalone Chao solver** baseline (no `poly_to_angles`) | Fair analytic comparison independent of PennyLane | **Implemented:** `qsp_jax/chao_baseline.py` (`pyqsp` Laurent completion); compare alongside PennyLane in `experiments/summarize.py baseline` |
 | **PennyLane-Lightning** device | Faster sweeps for Phase 2 statistics | Low |
 
 These are **evidence multipliers**, not prerequisites. The research question is about **gradient learning of QSP angles**, not about PennyLane advocacy.

@@ -35,6 +35,8 @@ Primary contributions (current state):
 
 See `docs/FRAMEWORKS.md` for when PennyLane is the right tool here vs. Qiskit, Cirq, TensorFlow Quantum, OpenFermion, or standalone analytic solvers.
 
+**Audit trail:** failures, fixes, comparisons, and rationale are logged in [`docs/AUDIT_TRAIL.md`](docs/AUDIT_TRAIL.md) and [`docs/audit/LOG.jsonl`](docs/audit/LOG.jsonl). See [`CHANGELOG.md`](CHANGELOG.md) for version summaries.
+
 ---
 
 ## Quick Start
@@ -57,8 +59,10 @@ Protocol defaults: `experiments/configs/default.json`
 # Single training run → results/*.json
 py -3.13 -m experiments.train --seed 0 --steps 500
 
-# Analytic baseline (included convenience wrapper: PennyLane poly_to_angles; see docs/FRAMEWORKS.md for alternatives)
+# Analytic baselines (PennyLane poly_to_angles + Chao/pyqsp; see docs/FRAMEWORKS.md)
 py -3.13 -m experiments.baseline_analytic
+py -3.13 -m experiments.baseline_analytic --backend pennylane
+py -3.13 -m experiments.baseline_analytic --backend chao --chao-method laurent
 
 # Phase 2 sweeps (use --quick for smoke tests)
 py -3.13 -m experiments.sweep multi-seed
@@ -67,6 +71,11 @@ py -3.13 -m experiments.sweep ablation
 
 # Comparison table + loss curve for paper/notebooks
 py -3.13 -m experiments.summarize baseline
+
+# Append an audit entry after a failed run or significant fix
+py -3.13 -m experiments.audit append --category failure --status open \
+  --title "..." --what "..." --why "..." --labels "tag1,tag2"
+py -3.13 -m experiments.audit list --last 10
 ```
 
 Analysis notebooks (after sweeps): `notebooks/01_baseline_comparison.ipynb`, `notebooks/02_scaling_study.ipynb`.
@@ -80,6 +89,10 @@ JSON outputs go to `results/` (see `results/schema.json`).
 ```
 trainable-qsp-angles/
 ├── docs/
+│   ├── AUDIT_TRAIL.md      # Failures, fixes, comparisons, rationale (human-readable)
+│   ├── audit/
+│   │   ├── LOG.jsonl       # Append-only machine audit log (committed)
+│   │   └── README.md       # How to append audit entries
 │   └── FRAMEWORKS.md       # Stack choices; PennyLane as ref. impl., not exclusive
 ├── manuscript.tex          # Paper source
 ├── references.bib          # Bibliography
@@ -98,10 +111,13 @@ trainable-qsp-angles/
 ├── target_polynomial.png   # Benchmark figure (also in demo.ipynb)
 ├── training_results.png
 ├── qsp_jax/
-│   ├── __init__.py
+│   ├── baseline.py         # PennyLane poly_to_angles wrapper
+│   ├── chao_baseline.py    # Standalone Chao / pyqsp Laurent completion
+│   ├── convention.py       # Phase maps (pyqsp/PL -> flat circuit)
 │   └── circuit.py          # Flat QSP circuit, target poly, loss
 ├── tests/
-│   └── test_circuit.py     # Unit tests
+│   ├── test_circuit.py
+│   └── test_chao_baseline.py
 ├── requirements.txt
 ├── LICENSE                 # Apache 2.0
 └── NOTICE                  # Attribution requirements

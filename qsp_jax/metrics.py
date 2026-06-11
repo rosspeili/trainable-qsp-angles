@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 
 from qsp_jax.circuit import qsp_circuit
 from qsp_jax.polynomial import target_poly
@@ -28,7 +29,7 @@ def evaluate_phases(
     xs_train: jnp.ndarray,
     xs_holdout: jnp.ndarray,
     degree: int = 5,
-) -> dict:
+) -> dict[str, float]:
     """Compute train and hold-out metrics for a phase vector."""
     return {
         "train_mse": mse(phases, xs_train, degree=degree),
@@ -36,3 +37,27 @@ def evaluate_phases(
         "train_max_error": max_pointwise_error(phases, xs_train, degree=degree),
         "holdout_max_error": max_pointwise_error(phases, xs_holdout, degree=degree),
     }
+
+
+def evaluate_phases_mapped(
+    solver_phases: np.ndarray,
+    xs_train: jnp.ndarray,
+    xs_holdout: jnp.ndarray,
+    *,
+    degree: int,
+    source: str,
+) -> tuple[dict[str, float], dict[str, float], jnp.ndarray]:
+    """
+    Evaluate raw and convention-mapped phases on the flat training circuit.
+
+    Returns (metrics_mapped, metrics_unmapped, flat_phases_jax).
+    """
+    from qsp_jax.convention import map_to_flat
+
+    raw = jnp.array(solver_phases)
+    flat = jnp.array(map_to_flat(solver_phases, source=source))
+    return (
+        evaluate_phases(flat, xs_train, xs_holdout, degree=degree),
+        evaluate_phases(raw, xs_train, xs_holdout, degree=degree),
+        flat,
+    )

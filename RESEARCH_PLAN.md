@@ -3,7 +3,7 @@
 **Project:** Trainable QSP Angles  
 **Author:** Ross Peili (Vladimiros Peilivanidis) — ARPA Hellenic Logical Systems  
 **Repository:** [github.com/rosspeili/trainable-qsp-angles](https://github.com/rosspeili/trainable-qsp-angles)  
-**Status:** Phase 1 complete; Phase 2 experiment pipeline implemented (run sweeps locally)
+**Status:** Phase 2 complete (experiments run locally); Phase 3 paper upgrade next.
 
 ---
 
@@ -21,6 +21,8 @@ However, **as a research contribution**, the work is currently an excellent **en
 4. Robustness across **seeds, hyperparameters, and target families**.
 
 This document turns external review feedback into a concrete, reproducible plan stored alongside code and paper sources.
+
+**Audit trail:** Every significant failure, fix, comparison, and design decision is recorded in [`docs/AUDIT_TRAIL.md`](docs/AUDIT_TRAIL.md) and append-only [`docs/audit/LOG.jsonl`](docs/audit/LOG.jsonl). See [`CHANGELOG.md`](CHANGELOG.md) for release summaries.
 
 ---
 
@@ -46,7 +48,7 @@ This document turns external review feedback into a concrete, reproducible plan 
 
 | Gap | Severity | Why it matters |
 |-----|----------|----------------|
-| No analytic baseline comparison | **Critical** | Cannot claim gradient training is viable without comparing to Chao et al. / `poly_to_angles` |
+| No analytic baseline comparison | **Critical** | ~~Cannot claim gradient training is viable without comparing to Chao et al. / `poly_to_angles`~~ **Addressed:** PennyLane + Chao (`qsp_jax/chao_baseline.py`) in comparison table |
 | Single degree (d=5), single target, single seed | **Critical** | No evidence of generality or statistical reliability |
 | No scaling study (d = 5, 10, 20, 50, …) | **Critical** | QSP theory and practice hinge on degree; both solvers fail differently at scale |
 | No ablation (lr, grid density, init range, optimizer) | **High** | Hyperparameters may dominate reported MSE |
@@ -187,21 +189,23 @@ Each hypothesis gets a pre-registered config file before running sweeps.
 ### Phase 1 — Reproducibility hardening ✅
 
 - [x] `experiments/train.py` — CLI training with seed, degree, steps from JSON protocol
-- [x] `experiments/baseline_analytic.py` — analytic phase computation + eval
+- [x] `experiments/baseline_analytic.py` — analytic phase computation + eval (PennyLane + Chao backends)
+- [x] `qsp_jax/chao_baseline.py` — standalone Chao / pyqsp Laurent completion (alongside PennyLane)
 - [x] `results/schema.json` for run metadata
 - [x] Extend tests: JAX traceability regression; hold-out / reproducibility tests
 - [x] GitHub Actions: `pytest tests/` (fast suite; `-m "not slow"`)
 - [x] Update `demo.ipynb` to import shared training module
 - [x] Fix manuscript author/email/repo links; soften overclaims in abstract
 
-### Phase 2 — Core experiments (in progress)
+### Phase 2 — Core experiments ✅
 
-- [x] Multi-seed sweep T1 (`experiments/sweep.py multi-seed`)
-- [x] Baseline comparison table (`experiments/summarize.py baseline`)
-- [x] Degree scaling d ∈ {5, 7, 10, 15, 20} (`experiments/sweep.py scaling`)
+- [x] Multi-seed sweep T1 (`experiments/sweep.py multi-seed`) — 30 seeds, `results/t1_degree5/summary.json`
+- [x] Baseline comparison table (`experiments/summarize.py baseline`) — 3 rows + mapped/unmapped columns
+- [x] Degree scaling d ∈ {5, 7, 9, 15, 21} (`experiments/sweep.py scaling`)
 - [x] Ablation: lr, grid size, init range (`experiments/sweep.py ablation`)
 - [x] Notebooks: `notebooks/01_baseline_comparison.ipynb`, `02_scaling_study.ipynb`
 - [x] Paper curve export: `results/paper/loss_curve_d5_seed0.json`
+- [x] Convention mapping: `qsp_jax/convention.py`, `docs/CONVENTIONS.md`
 - [ ] Regenerate manuscript pgfplots from exported JSON (Phase 3)
 
 ### Phase 3 — Paper upgrade (2–3 weeks)
@@ -219,7 +223,7 @@ Each hypothesis gets a pre-registered config file before running sweeps.
 - [ ] Curriculum over degree (warm-start φ from d−1)
 - [ ] Second-order optimizers (L-BFGS on small d)
 - [ ] QSVT block-encoding extension (multi-qubit flat pattern)
-- [ ] **Cross-framework validation** (Qiskit / Cirq / standalone Chao solver) — see `docs/FRAMEWORKS.md`
+- [ ] **Cross-framework validation** (Qiskit / Cirq) — see `docs/FRAMEWORKS.md`; Chao/pyqsp baseline implemented in `qsp_jax/chao_baseline.py`
 - [ ] PennyLane-Lightning device for faster Phase 2 sweeps (same API, different backend)
 
 ---
@@ -266,7 +270,7 @@ Not hype — **evidence density**:
 1. **Every number in the paper traceable to a committed results file** (hash in manuscript footnote).
 2. **Analytic baseline on equal footing** — if gradient wins nowhere at low d, say so honestly and pivot claim to implicit-target / no-closed-form scenarios.
 3. **Scaling cliff chart** — even negative results are publishable if well-measured.
-4. **Open failure logs** — seeds that fail, with gradient norms and phase trajectories.
+4. **Open failure logs** — seeds that fail, with gradient norms and phase trajectories. Tracked in `docs/audit/LOG.jsonl` and `docs/AUDIT_TRAIL.md`.
 5. **Independent re-run instructions** — one command reproduces Table X.
 
 That package supports either a solid **software + methods paper** or a stronger arXiv preprint — without pretending gradient descent on QSP is unknown physics.

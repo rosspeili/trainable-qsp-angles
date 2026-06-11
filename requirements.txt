@@ -7,3 +7,4 @@ numpy>=1.26
 jupyter>=1.0
 pandas>=2.0
 pytest>=8.0
+pyqsp>=0.2

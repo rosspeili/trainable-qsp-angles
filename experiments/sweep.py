@@ -12,6 +12,7 @@ from typing import Any
 
 from experiments.config import load_protocol_config
 from qsp_jax.baseline import evaluate_analytic
+from qsp_jax.chao_baseline import evaluate_chao_analytic
 from qsp_jax.io import utc_stamp, write_json
 from qsp_jax.train import TrainConfig, train
 
@@ -71,6 +72,7 @@ def scaling_study(degrees: list[int], seed: int, output_dir: Path, steps: int) -
         cfg = TrainConfig(degree=degree, seed=seed, steps=steps)
         result = train(cfg, verbose=False)
         analytic = evaluate_analytic(cfg)
+        chao = evaluate_chao_analytic(cfg)
         row = {
             "degree": degree,
             "seed": seed,
@@ -78,7 +80,12 @@ def scaling_study(degrees: list[int], seed: int, output_dir: Path, steps: int) -
             "holdout_mse": result.metrics["holdout_mse"],
             "train_time_s": result.train_time_s,
             "analytic_train_mse_flat_circuit": analytic.metrics["train_mse"],
+            "analytic_train_mse_unmapped": analytic.metrics_unmapped["train_mse"],
             "analytic_solve_time_s": analytic.solve_time_s,
+            "chao_train_mse_flat_circuit": chao.metrics["train_mse"],
+            "chao_train_mse_unmapped": chao.metrics_unmapped["train_mse"],
+            "chao_solve_time_s": chao.solve_time_s,
+            "chao_pyqsp_reconstruction_max_error": chao.pyqsp_reconstruction_max_error,
             "gradient_norm_final": result.gradient_norm_final,
             "success_train_mse_lt_1e-3": result.metrics["train_mse"] < 1e-3,
         }
@@ -89,6 +96,7 @@ def scaling_study(degrees: list[int], seed: int, output_dir: Path, steps: int) -
             "target_id": "T1",
             **result.to_dict(),
             "analytic_baseline": analytic.to_dict(),
+            "chao_baseline": chao.to_dict(),
         })
 
     csv_path = run_dir / "scaling_table.csv"

@@ -7,65 +7,125 @@ import argparse
 import csv
 import json
 from pathlib import Path
+from typing import Any
 
 from experiments.config import load_protocol_config
 from qsp_jax.baseline import evaluate_analytic
+from qsp_jax.chao_baseline import evaluate_chao_analytic
 from qsp_jax.io import utc_stamp, write_json
 from qsp_jax.train import TrainConfig, train
 
+COMPARISON_FIELDS = [
+    "method",
+    "backend",
+    "degree",
+    "seed",
+    "train_mse",
+    "train_mse_unmapped",
+    "holdout_mse",
+    "train_max_error",
+    "holdout_max_error",
+    "wall_clock_s",
+    "gradient_norm_final",
+    "pyqsp_reconstruction_max_error",
+    "convention_note",
+]
+
+
+def _comparison_row(
+    *,
+    method: str,
+    backend: str,
+    degree: int,
+    seed: int,
+    metrics: dict[str, float],
+    wall_clock_s: float,
+    metrics_unmapped: dict[str, float] | None = None,
+    gradient_norm_final: str | float = "",
+    pyqsp_reconstruction_max_error: str | float = "",
+    convention_note: str = "",
+) -> dict[str, Any]:
+    unmapped = metrics_unmapped or {}
+    return {
+        "method": method,
+        "backend": backend,
+        "degree": degree,
+        "seed": seed,
+        "train_mse": metrics["train_mse"],
+        "train_mse_unmapped": unmapped.get("train_mse", ""),
+        "holdout_mse": metrics["holdout_mse"],
+        "train_max_error": metrics["train_max_error"],
+        "holdout_max_error": metrics["holdout_max_error"],
+        "wall_clock_s": wall_clock_s,
+        "gradient_norm_final": gradient_norm_final,
+        "pyqsp_reconstruction_max_error": pyqsp_reconstruction_max_error,
+        "convention_note": convention_note,
+    }
+
 
 def export_baseline_comparison(output_dir: Path, degree: int = 5, seed: int = 0) -> Path:
-    """Run learned vs analytic snapshot and write comparison CSV/JSON."""
+    """Run learned vs analytic snapshots and write comparison CSV/JSON."""
     paper_dir = output_dir / "paper"
     paper_dir.mkdir(parents=True, exist_ok=True)
 
     cfg = TrainConfig(degree=degree, seed=seed)
     learned = train(cfg, verbose=False)
-    analytic = evaluate_analytic(cfg)
+    pennylane = evaluate_analytic(cfg)
+    chao = evaluate_chao_analytic(cfg)
 
-    row = {
-        "method": "gradient_adam",
-        "degree": degree,
-        "seed": seed,
-        "train_mse": learned.metrics["train_mse"],
-        "holdout_mse": learned.metrics["holdout_mse"],
-        "train_max_error": learned.metrics["train_max_error"],
-        "holdout_max_error": learned.metrics["holdout_max_error"],
-        "wall_clock_s": learned.train_time_s,
-        "gradient_norm_final": learned.gradient_norm_final,
-    }
-    analytic_row = {
-        "method": "analytic_poly_to_angles",
-        "backend": "pennylane_iterative",
-        "degree": degree,
-        "seed": seed,
-        "train_mse": analytic.metrics["train_mse"],
-        "holdout_mse": analytic.metrics["holdout_mse"],
-        "train_max_error": analytic.metrics["train_max_error"],
-        "holdout_max_error": analytic.metrics["holdout_max_error"],
-        "wall_clock_s": analytic.solve_time_s,
-        "gradient_norm_final": "",
-        "convention_note": analytic.convention_note,
-    }
+    rows = [
+        _comparison_row(
+            method="gradient_adam",
+            backend="jax_flat_circuit",
+            degree=degree,
+            seed=seed,
+            metrics=learned.metrics,
+            wall_clock_s=learned.train_time_s,
+            gradient_norm_final=learned.gradient_norm_final,
+        ),
+        _comparison_row(
+            method="analytic_poly_to_angles",
+            backend="pennylane_iterative",
+            degree=degree,
+            seed=seed,
+            metrics=pennylane.metrics,
+            metrics_unmapped=pennylane.metrics_unmapped,
+            wall_clock_s=pennylane.solve_time_s,
+            convention_note=pennylane.convention_note,
+        ),
+        _comparison_row(
+            method="analytic_chao_laurent",
+            backend=f"pyqsp_laurent_{chao.signal_operator}",
+            degree=degree,
+            seed=seed,
+            metrics=chao.metrics,
+            metrics_unmapped=chao.metrics_unmapped,
+            wall_clock_s=chao.solve_time_s,
+            pyqsp_reconstruction_max_error=chao.pyqsp_reconstruction_max_error,
+            convention_note=chao.convention_note,
+        ),
+    ]
 
     csv_path = paper_dir / f"baseline_comparison_d{degree}.csv"
     with csv_path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(row.keys()) + ["convention_note"])
+        writer = csv.DictWriter(handle, fieldnames=COMPARISON_FIELDS)
         writer.writeheader()
-        writer.writerow({**row, "convention_note": ""})
-        writer.writerow(analytic_row)
+        writer.writerows(rows)
 
     payload = {
         "run_type": "comparison_table",
         "timestamp_utc": utc_stamp(),
-        "rows": [row, analytic_row],
+        "rows": rows,
         "learned_phases": learned.phases_final,
-        "analytic_angles": analytic.angles,
+        "pennylane_analytic_angles": pennylane.angles,
+        "pennylane_analytic_angles_solver": pennylane.angles_solver,
+        "chao_analytic_angles": chao.angles,
+        "chao_analytic_angles_solver": chao.angles_solver,
+        "analytic_angles": pennylane.angles,
     }
     json_path = paper_dir / f"baseline_comparison_d{degree}.json"
     write_json(json_path, payload)
 
-    # Loss curve for manuscript (seed 0, degree 5)
     curve_path = paper_dir / f"loss_curve_d{degree}_seed{seed}.json"
     write_json(curve_path, {
         "run_type": "loss_curve",
