@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Export pgfplots-ready data files from results/ for manuscript.tex."""
+"""Export legacy pgfplots .dat files from results/ (optional).
+
+Prefer ``py -3.13 -m experiments.generate_manuscript_numbers`` for the
+self-contained ``manuscript_numbers.tex`` used by ``manuscript.tex``.
+"""
 
 from __future__ import annotations
 

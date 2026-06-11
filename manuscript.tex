@@ -72,7 +72,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\small\color{graytext}R. Peili}
+\fancyhead[L]{\small\color{graytext}V. Peilivanidis}
 \fancyhead[R]{\small\color{graytext}Learning QSP Phase Angles --- Empirical Study}
 \fancyfoot[C]{\small\thepage}
 \renewcommand{\headrulewidth}{0.3pt}
@@ -149,31 +149,43 @@
 }
 
 \author{%
-  \textbf{Ross Peili (Vladimiros Peilivanidis)}\\[0.25em]
+  \textbf{Vladimiros Peilivanidis}\\[0.25em]
   {\small ARPA Hellenic Logical Systems, Thessaloniki, Greece}\\
-  {\small \href{mailto:vpeilivanidis@gmail.com}{\texttt{vpeilivanidis@gmail.com}}}
+  {\small \href{mailto:r1@arpacorp.net}{\texttt{r1@arpacorp.net}}}
   \quad{\small ORCID: \href{https://orcid.org/0009-0003-0121-465X}{0009-0003-0121-465X}}
 }
 
-\date{%
-  \small June 2026\quad|\quad
-  {\normalfont\color{graytext}%
-   Code: \href{https://github.com/rosspeili/trainable-qsp-angles}{\texttt{github.com/rosspeili/trainable-qsp-angles}}
-   \quad|\quad
-   Data: \href{https://doi.org/10.5281/zenodo.20645403}{10.5281/zenodo.20645403}}%
-}
+\date{\small June 2026}
+
+\input{manuscript_numbers.tex}
 
 \begin{document}
 
 \maketitle
 \thispagestyle{firstpage}
 
+\begin{center}
+\begin{tcolorbox}[
+  enhanced, arc=3pt, boxrule=0.4pt,
+  colback=boxbg, colframe=coderule,
+  left=8pt, right=8pt, top=4pt, bottom=4pt,
+  width=0.92\textwidth, halign=center
+]
+{\small\color{graytext}%
+ DOI\ \href{https://doi.org/10.5281/zenodo.20645403}{\texttt{10.5281/zenodo.20645403}}
+ \quad|\quad
+ Code\ \href{https://github.com/rosspeili/trainable-qsp-angles}{\texttt{github.com/rosspeili/trainable-qsp-angles}}
+ \quad|\quad
+ ORCID\ \href{https://orcid.org/0009-0003-0121-465X}{\texttt{0009-0003-0121-465X}}}
+\end{tcolorbox}
+\end{center}
+
 %% Abstract environment
 \begin{center}
 \begin{minipage}{0.92\textwidth}
 \small
 \textbf{Abstract.}\quad
-Quantum Signal Processing (QSP) is a foundational algorithmic primitive that encodes polynomial transformations of a scalar signal into a single-qubit quantum circuit via a structured sequence of phase-shifted oracle calls. The canonical approach computes phase angles analytically from a target polynomial---a well-studied but numerically sensitive problem. We present a reproducible \emph{empirical study} of \emph{learning} QSP phase angles from random initialization using gradient-based optimization on a JAX-traceable \emph{flat} circuit (PennyLane is used only as a reference frontend). We benchmark a degree-5 Chebyshev approximation of $\sin(x)$ with Adam over 500 steps, multi-seed replication ($n=30$), degree scaling, and analytic baselines (PennyLane \texttt{poly\_to\_angles} and Chao et al.\ via \texttt{pyqsp}). For the reference seed, training reaches train MSE $9.6\times10^{-5}$; mapped analytic baselines on the same flat circuit achieve $\approx4.7\times10^{-3}$. We document phase-convention mapping between solver output and the training circuit, identify a QSVT-template pitfall for JAX tracing, and release experiment scripts, audit logs, and figure data under Apache~2.0 (Zenodo: \href{https://doi.org/10.5281/zenodo.20645403}{10.5281/zenodo.20645403}).
+Quantum Signal Processing (QSP) builds a one-qubit circuit that evaluates a polynomial in a scalar signal~$x$. Classically, the circuit's phase angles are computed by analytic solvers; here we \emph{learn} them from random initialization with gradient descent on a flat, JAX-traceable circuit (PennyLane is reference-only). On a standard degree-5 Chebyshev approximation of $\sin(x)$, Adam training reaches train MSE $9.6\times10^{-5}$ for seed~0---better than mapped analytic baselines ($\approx4.7\times10^{-3}$) on the same circuit---and 30/30 random seeds converge below $10^{-3}$. We report degree scaling, phase-convention mapping between solvers and the training circuit, and a QSVT-template pitfall that breaks JAX autodiff. Scripts, audit logs, and reproducible numbers are released under Apache~2.0.
 
 \vspace{6pt}
 \noindent\textbf{Keywords:}\quad
@@ -481,13 +493,13 @@ def qsp_qnode(phases, x):
 \label{tab:stack}
 \end{table}
 
-Phase angles are initialized uniformly in $[-0.5,0.5]$. A uniform grid of 64 signal points on $[-0.95,0.95]$ is used; the loss and gradient step are JIT-compiled, and circuit evaluations are batched via \texttt{jax.vmap}.
+Phase angles are initialized uniformly in $[-0.5,0.5]$. A uniform grid of 64 signal points on $[-0.95,0.95]$ is used; the loss and gradient step are JIT-compiled, and circuit evaluations are batched via \texttt{jax.vmap}. We additionally ablate learning rate, grid density, and initialization range (18 configs, seed~0; \texttt{results/ablation/})---reported briefly in Section~\ref{sec:ablation}.
 
 %% ============================================================
 \section{Results}
 %% ============================================================
 
-All numerical values in this section are exported from \texttt{results/} via \texttt{experiments.export\_manuscript\_figures} into \texttt{manuscript\_data/} (reproducible with \texttt{py -3.13 -m experiments.summarize baseline} and \texttt{py -3.13 -m experiments.sweep all}).
+All numerical values in this section are hardcoded in \texttt{manuscript\_numbers.tex} (included at compile time). Provenance: \texttt{results/paper/}, \texttt{results/t1\_degree5/}, \texttt{results/scaling/}, and \texttt{results/ablation/} JSON/CSV logs generated on 2026-06-11 by \texttt{py -3.13 -m experiments.summarize baseline} and \texttt{py -3.13 -m experiments.sweep}. Regenerate figure coordinates with \texttt{py -3.13 -m experiments.generate\_manuscript\_numbers}.
 
 \subsection{Convergence (Reference Seed)}
 
@@ -516,8 +528,7 @@ with train MSE $9.6\times10^{-5}$, hold-out MSE $1.66\times10^{-3}$, and maximum
   ylabel style={font=\small},
   tick label style={font=\small, color=graytext},
 ]
-\addplot[accent, thick] table[x=step, y=loss, col sep=space]
-  {manuscript_data/loss_curve_d5_seed0.dat};
+\addplot[accent, thick] coordinates {\LossCurveCoords};
 \addplot[only marks, mark=*, mark size=2.5pt, accent] coordinates {(0,1.361)};
 \addplot[only marks, mark=o, mark size=2.5pt, accent!70] coordinates {(100,5.75e-4)};
 \addplot[only marks, mark=square*, mark size=2.5pt, black!70] coordinates {(500,9.64e-5)};
@@ -526,7 +537,7 @@ with train MSE $9.6\times10^{-5}$, hold-out MSE $1.66\times10^{-3}$, and maximum
 \node[font=\scriptsize, anchor=south west, text=black!70] at (axis cs:355,1.3e-4) {Final: $9.6\times10^{-5}$};
 \end{semilogyaxis}
 \end{tikzpicture}
-\caption{Training loss (log scale) over 500 Adam steps (seed~0, degree~5). Curve data from \texttt{manuscript\_data/loss\_curve\_d5\_seed0.dat}.}
+\caption{Training loss (log scale) over 500 Adam steps (seed~0, degree~5). Coordinates from \texttt{results/paper/loss\_curve\_d5\_seed0.json}.}
 \label{fig:loss}
 \end{figure}
 
@@ -538,29 +549,48 @@ We repeated training for 30 independent seeds at degree~5. Train MSE exhibits a 
 \centering
 \begin{tikzpicture}
 \begin{semilogyaxis}[
-  width=0.55\textwidth, height=4.8cm,
+  width=0.72\textwidth, height=4.8cm,
   ylabel={Train MSE},
-  xtick={0,1,2},
-  xticklabels={},
-  xmin=-0.5, xmax=2.5,
-  ymin=3e-5, ymax=8e-4,
+  xlabel={Seed index},
+  xmin=-1, xmax=30,
+  xtick={0,5,10,15,20,25,29},
+  ymin=3e-5, ymax=1.2e-3,
   grid=both,
   grid style={line width=0.3pt, draw=lightrule},
   axis line style={accent},
   tick label style={font=\small, color=graytext},
   ylabel style={font=\small},
+  xlabel style={font=\small},
 ]
-\addplot[accent, only marks, mark=*, mark size=1.8pt, opacity=0.75]
-  table[x=index, y=train_mse, col sep=space]
-  {manuscript_data/multiseed_d5_train_mse.dat};
-\addplot[accent, dashed, thick] coordinates {(-0.4,6.3e-5) (2.4,6.3e-5)};
-\node[font=\scriptsize, anchor=south] at (axis cs:1,3.5e-5) {30 seeds, $d=5$};
-\node[font=\scriptsize, anchor=west, accent] at (axis cs:2.05,8e-5) {median $6.3\times10^{-5}$};
+\addplot[accent, only marks, mark=*, mark size=1.8pt, opacity=0.85]
+  coordinates {\MultiSeedCoords};
+\addplot[accent, dashed, thick] coordinates {(-1,6.3e-5) (30,6.3e-5)};
+\node[font=\scriptsize, anchor=north west, accent] at (axis cs:22,9e-5) {median $6.3\times10^{-5}$};
 \end{semilogyaxis}
 \end{tikzpicture}
-\caption{Per-seed train MSE at degree~5 ($n=30$). Dashed line: median.}
+\caption{Per-seed train MSE at degree~5 ($n=30$). Points from \texttt{results/t1\_degree5/train\_seed*.json}; dashed line: median.}
 \label{fig:multiseed}
 \end{figure}
+
+\subsection{Hyperparameter Ablation}
+\label{sec:ablation}
+
+We swept learning rate $\in\{0.01,0.05,0.1\}$, training grid size $\in\{32,64,128\}$, and uniform initialization in $[-0.5,0.5]$ or $[-1,1]$ (18 configs, seed~0). All runs converged below the protocol threshold ($10^{-3}$ train MSE); train MSE ranged from $3.7\times10^{-5}$ to $1.8\times10^{-4}$ (Table~\ref{tab:ablation}). The default protocol ($\mathrm{lr}=0.05$, 64 points, init $\pm0.5$) is mid-pack rather than tuned; headline results are not sensitive to these hyperparameters on T1 at $d=5$.
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{@{} r r l r @{}}
+  \toprule
+  \textbf{lr} & \textbf{Grid} & \textbf{Init range} & \textbf{Train MSE} \\
+  \midrule
+  0.05 & 64 & $[-0.5,0.5]$ & $9.6\times10^{-5}$ (default) \\
+  0.10 & 128 & $[-1,1]$ & $3.7\times10^{-5}$ (best) \\
+  0.01 & 32 & $[-1,1]$ & $1.8\times10^{-4}$ (worst) \\
+  \bottomrule
+\end{tabular}
+\caption{Representative ablation rows (seed~0, $d=5$). Full grid in \texttt{results/ablation/ablation\_table.csv}.}
+\label{tab:ablation}
+\end{table}
 
 \subsection{Baseline Comparison}
 
@@ -596,16 +626,14 @@ Table~\ref{tab:baseline} compares gradient Adam to analytic solvers on the \emph
   axis line style={accent},
   tick label style={font=\small, color=graytext},
   ylabel style={font=\small},
-  ybar,
-  bar width=18pt,
   enlarge x limits=0.25,
 ]
-\addplot[fill=accent!75, draw=accent] coordinates {
+\addplot[accent, only marks, mark=*, mark size=5pt] coordinates {
   (Gradient,9.6e-5) (PennyLane,4.7e-3) (Chao,4.7e-3)
 };
 \end{semilogyaxis}
 \end{tikzpicture}
-\caption{Mapped train MSE for gradient vs.\ analytic baselines (degree~5, seed~0).}
+\caption{Mapped train MSE for gradient vs.\ analytic baselines (degree~5, seed~0). Values from \texttt{results/paper/baseline\_comparison\_d5.json}.}
 \label{fig:baseline}
 \end{figure}
 
@@ -620,25 +648,28 @@ Figure~\ref{fig:scaling} summarizes seed~0 training at odd degrees $\{5,7,9,15,2
   width=0.72\textwidth, height=5.5cm,
   xlabel={Polynomial degree $d$},
   ylabel={Train MSE (mapped)},
+  xmode=normal,
+  xmin=4, xmax=22,
   xtick={5,7,9,15,21},
+  ymin=1e-6, ymax=1,
   grid=both,
   grid style={line width=0.3pt, draw=lightrule},
   axis line style={accent},
   tick label style={font=\small, color=graytext},
   xlabel style={font=\small},
   ylabel style={font=\small},
-  legend style={font=\small, at={(0.02,0.02)}, anchor=south west,
+  legend style={font=\small, at={(0.02,0.98)}, anchor=north west,
                 draw=lightrule, fill=white},
 ]
-\addplot[accent, thick, mark=*, mark size=2pt]
-  table[x=degree, y=learned, col sep=space] {manuscript_data/scaling_table.dat};
+\addplot[accent, thick, mark=*, mark size=2.5pt]
+  coordinates {\ScalingLearnedCoords};
 \addlegendentry{Gradient Adam}
-\addplot[black!70, thick, dashed, mark=square*, mark size=2pt]
-  table[x=degree, y=analytic_mapped, col sep=space] {manuscript_data/scaling_table.dat};
+\addplot[black!70, thick, dashed, mark=square*, mark size=2.5pt]
+  coordinates {\ScalingAnalyticCoords};
 \addlegendentry{Analytic (mapped)}
 \end{semilogyaxis}
 \end{tikzpicture}
-\caption{Degree scaling (seed~0): learned vs.\ mapped analytic train MSE.}
+\caption{Degree scaling (seed~0): learned vs.\ mapped analytic train MSE. From \texttt{results/scaling/scaling\_table.csv}.}
 \label{fig:scaling}
 \end{figure}
 
@@ -669,26 +700,26 @@ Figure~\ref{fig:poly} shows the Chebyshev target, the trained circuit output $\l
 \nextgroupplot[
   ylabel={$P(x)$},
   ymin=-1.05, ymax=1.05,
+  legend style={at={(0.97,0.95)}, anchor=north east, font=\scriptsize,
+                draw=lightrule, fill=white},
 ]
-\addplot[gray, dashed, thick]
-  table[x=x, y=target, col sep=space] {manuscript_data/poly_fidelity_d5_seed0.dat};
+\addplot[gray, dashed, thick, domain=-0.95:0.95, samples=100]
+  {1.5257*x - 0.9416*x^3 + 0.2528*x^5};
 \addlegendentry{$P_{\mathrm{target}}$ (Chebyshev)}
 \addplot[accent, thick, densely dashed]
-  table[x=x, y=learned, col sep=space] {manuscript_data/poly_fidelity_d5_seed0.dat};
+  coordinates {\PolyLearnedCoords};
 \addlegendentry{Trained $\langle X\rangle$}
-\legend{at={(0.97,0.95)}, anchor=north east, font=\scriptsize,
-         draw=lightrule, fill=white}
 \nextgroupplot[
   xlabel={Signal $x$},
   ylabel={Residual},
   ymin=-0.06, ymax=0.06,
 ]
 \addplot[accent!70, thick]
-  table[x=x, y=residual, col sep=space] {manuscript_data/poly_fidelity_d5_seed0.dat};
+  coordinates {\PolyResidualCoords};
 \addplot[gray!50, thin] coordinates {(-1,0) (1,0)};
 \end{groupplot}
 \end{tikzpicture}
-\caption{Polynomial fidelity (seed~0). \textbf{Top:} target vs.\ circuit output from exported phases. \textbf{Bottom:} pointwise residual on a dense grid.}
+\caption{Polynomial fidelity (seed~0). \textbf{Top:} Chebyshev target vs.\ circuit output from learned phases in \texttt{results/paper/baseline\_comparison\_d5.json}. \textbf{Bottom:} pointwise residual on a dense grid.}
 \label{fig:poly}
 \end{figure}
 
@@ -725,7 +756,7 @@ The flat-circuit pattern described in Section~3.3 is the correct workaround for 
 
 \subsection{Reproducibility}
 
-The implementation, experiment scripts, audit trail (\texttt{docs/AUDIT\_TRAIL.md}), and figure data are available at \url{https://github.com/rosspeili/trainable-qsp-angles}~\cite{peili_trainable_qsp_2026} (DOI: \href{https://doi.org/10.5281/zenodo.20645403}{10.5281/zenodo.20645403}). Regenerate tables and plots with \texttt{py -3.13 -m experiments.sweep all}, \texttt{py -3.13 -m experiments.summarize baseline}, and \texttt{py -3.13 -m experiments.export\_manuscript\_figures}.
+The implementation, experiment scripts, audit trail (\texttt{docs/AUDIT\_TRAIL.md}), and hardcoded figure values (\texttt{manuscript\_numbers.tex}) are available at \url{https://github.com/rosspeili/trainable-qsp-angles}~\cite{peili_trainable_qsp_2026} (DOI: \href{https://doi.org/10.5281/zenodo.20645403}{10.5281/zenodo.20645403}). Regenerate \texttt{manuscript\_numbers.tex} with \texttt{py -3.13 -m experiments.sweep all}, \texttt{py -3.13 -m experiments.summarize baseline}, and \texttt{py -3.13 -m experiments.generate\_manuscript\_numbers}.
 
 \subsection{Limitations}
 \label{sec:limitations}
@@ -735,6 +766,7 @@ The implementation, experiment scripts, audit trail (\texttt{docs/AUDIT\_TRAIL.m
   \item \textbf{Single target family.} Results apply to one Chebyshev $\sin$ benchmark (T1); other polynomials may behave differently.
   \item \textbf{Simulation only.} No shot noise, hardware, or transpilation effects.
   \item \textbf{Scaling statistics.} Degree scaling uses one seed per degree; multi-seed stats are reported at $d=5$ only.
+  \item \textbf{Ablation scope.} Hyperparameter ablation (Section~\ref{sec:ablation}) uses seed~0 only; multi-seed stats cover the default protocol at $d=5$.
   \item \textbf{Reference stack.} One PennyLane+JAX implementation; the flat-circuit recipe is portable but not cross-validated on hardware here.
 \end{itemize}
 

@@ -1,9 +1,10 @@
 # Research Analysis and Experimental Roadmap
 
 **Project:** Trainable QSP Angles  
-**Author:** Ross Peili (Vladimiros Peilivanidis) — ARPA Hellenic Logical Systems  
+**Author:** Vladimiros Peilivanidis — ARPA Hellenic Logical Systems  
+**Email:** r1@arpacorp.net · **ORCID:** [0009-0003-0121-465X](https://orcid.org/0009-0003-0121-465X) · **DOI:** [10.5281/zenodo.20645403](https://doi.org/10.5281/zenodo.20645403)  
 **Repository:** [github.com/rosspeili/trainable-qsp-angles](https://github.com/rosspeili/trainable-qsp-angles)  
-**Status:** Phase 2 complete (experiments run locally); Phase 3 paper upgrade next.
+**Status:** Phase 3 complete (manuscript + self-contained figures); ready for Zenodo PDF upload.
 
 ---
 
@@ -49,16 +50,16 @@ This document turns external review feedback into a concrete, reproducible plan 
 | Gap | Severity | Why it matters |
 |-----|----------|----------------|
 | No analytic baseline comparison | **Critical** | ~~Cannot claim gradient training is viable without comparing to Chao et al. / `poly_to_angles`~~ **Addressed:** PennyLane + Chao (`qsp_jax/chao_baseline.py`) in comparison table |
-| Single degree (d=5), single target, single seed | **Critical** | No evidence of generality or statistical reliability |
-| No scaling study (d = 5, 10, 20, 50, …) | **Critical** | QSP theory and practice hinge on degree; both solvers fail differently at scale |
-| No ablation (lr, grid density, init range, optimizer) | **High** | Hyperparameters may dominate reported MSE |
-| No QSP parity / reconstruction verification | **High** | Matching MSE on 64 points ≠ valid QSP phase sequence |
-| No dense hold-out evaluation (e.g. 10⁴ Chebyshev points) | **High** | Grid overfitting is possible |
-| No runtime / wall-clock benchmarks | **Medium** | Practitioners need cost trade-offs |
-| No gradient norm / landscape diagnostics | **Medium** | Explains convergence and failure modes |
-| Philosophical section unsupported by data | **Low** (for research) | Fine as outlook; weak for claims |
-| Placeholder DOI, postdated metadata | **Medium** (presentation) | Fix before any public arXiv submission |
-| Title implies general method; experiment is one case study | **Medium** | Reframe title or expand experiments |
+| Single degree (d=5), single target, single seed | **Partial** | Multi-seed + scaling + ablation done; still one target family (T1) |
+| No scaling study (d = 5, 10, 20, 50, …) | **Partial** | d ∈ {5,7,9,15,21}, seed 0; scaling figure in paper |
+| No ablation (lr, grid density, init range, optimizer) | **Addressed** | 18-config sweep in `results/ablation/`; summarized in paper §4.3 |
+| No QSP parity / reconstruction verification | **Partial** | Dense-grid poly fidelity figure + hold-out MSE; no phase-unwrapping audit |
+| No dense hold-out evaluation (e.g. 10⁴ Chebyshev points) | **Partial** | 512-point hold-out in protocol; hold-out ≫ train MSE documented |
+| No runtime / wall-clock benchmarks | **Addressed** | Table 3 wall-clock column |
+| No gradient norm / landscape diagnostics | **Open** | Phase 4 / future work |
+| Philosophical section unsupported by data | **Addressed** | Condensed Outlook |
+| Placeholder DOI, postdated metadata | **Addressed** | Zenodo DOI 10.5281/zenodo.20645403 on title page |
+| Title implies general method; experiment is one case study | **Addressed** | Subtitle: reproducible empirical study; Limitations name T1 scope |
 
 ### 3.2 Wording / positioning gaps
 
@@ -206,20 +207,22 @@ Each hypothesis gets a pre-registered config file before running sweeps.
 - [x] Notebooks: `notebooks/01_baseline_comparison.ipynb`, `02_scaling_study.ipynb`
 - [x] Paper curve export: `results/paper/loss_curve_d5_seed0.json`
 - [x] Convention mapping: `qsp_jax/convention.py`, `docs/CONVENTIONS.md`
-- [x] Regenerate manuscript figures from exported JSON/CSV (`experiments/export_manuscript_figures.py`, `manuscript_data/`)
+- [x] Regenerate manuscript figures from exported JSON/CSV (`experiments/generate_manuscript_numbers.py`, `manuscript_numbers.tex`)
 - [x] Results section: baselines, 30-seed stats, scaling (manuscript draft updated)
 - [x] Limitations + short Outlook (replaces Food for Thought)
 - [x] Zenodo DOI: 10.5281/zenodo.20645403
-- [ ] Final author proofread / title polish
+- [x] Final author proofread / title polish (V. Peilivanidis, DOI/ORCID badges, self-contained figures)
 
-### Phase 3 — Paper upgrade (2–3 weeks)
+### Phase 3 — Paper upgrade ✅
 
-- [ ] Retitle (suggested): *"Gradient-Based Learning of QSP Phase Angles: A Reproducible Study with JAX-Traceable Circuits"*
-- [ ] New Results section: baselines, scaling, statistics
-- [ ] Move "Food for Thought" to short Outlook (clearly labeled speculative)
-- [ ] Add Limitations section (explicit)
-- [ ] Remove placeholder DOI until arXiv ID exists
-- [ ] Target venue: SoftwareX, Quantum Sci. Technol. technical note, or arXiv + community report
+- [x] Retitle: *Learning QSP Phase Angles via Gradient Descent* + subtitle *A Reproducible Empirical Study with JAX-Traceable Circuits*
+- [x] New Results section: baselines, scaling, statistics, polynomial fidelity
+- [x] Move "Food for Thought" to short Outlook (clearly labeled speculative)
+- [x] Add Limitations section (explicit)
+- [x] Zenodo DOI on title page (self-publish; no arXiv)
+- [x] Self-contained figures via `manuscript_numbers.tex` (no compile-time `.dat` dependency)
+- [x] Ablation results in paper (§4.3 + Table 4; full data in `results/ablation/`)
+- [x] Target venue: Zenodo + GitHub (self-publish; no arXiv)
 
 ### Phase 4 — Optional extensions (research frontier)
 
@@ -236,15 +239,14 @@ Each hypothesis gets a pre-registered config file before running sweeps.
 
 | Section | Action |
 |---------|--------|
-| Title | Add "A Case Study" or "An Empirical Study" unless Phase 2 experiments complete |
-| Abstract | Lead with JAX traceability fix; gradient learning as demonstrated method, not new paradigm |
-| Contributions C1–C4 | Keep C1 (JAX fix); reword C2 as reproducible benchmark; C3 keep; C4 update repo URL |
-| Author | Ross Peili; vpeilivanidis@gmail.com; ARPA Hellenic Logical Systems |
-| §Results | Replace hand-plotted coordinates with script-generated data; add error bars |
-| §Discussion | Add Limitations subsection from §3.1 gaps |
-| §Food for Thought | Rename §Outlook; shorten claims |
-| Metadata | Remove fake DOI; date = actual submission date |
-| Code availability | Point to `trainable-qsp-angles` only |
+| Title | Done — empirical study subtitle; matches README |
+| Abstract | Done — shorter; leads with learning vs analytic; JAX traceability |
+| Contributions C1–C4 | Done |
+| Author | Done — Vladimiros Peilivanidis; r1@arpacorp.net; ORCID; DOI badge |
+| §Results | Done — hardcoded figures + ablation table + source paths in captions |
+| §Discussion | Done — Limitations + Outlook |
+| Metadata | Done — Zenodo DOI 10.5281/zenodo.20645403 |
+| Code availability | Done — trainable-qsp-angles + regenerate script |
 
 ---
 
@@ -281,14 +283,13 @@ That package supports either a solid **software + methods paper** or a stronger 
 
 ---
 
-## 10. Immediate Next Actions (Priority Order)
+## 10. Next Actions (post Phase 3)
 
-1. Run `pytest tests/ -v` after every change (CI next).
-2. Implement `experiments/baseline_analytic.py` using PennyLane polynomial-to-angles.
-3. Run 30-seed replication of current d=5 benchmark; store under `results/t1_degree5/`.
-4. Draft baseline comparison table for manuscript §4.
-5. Add JAX/QSVT regression test (short, deterministic).
-6. Revise abstract + contributions in `manuscript.tex` (wording only, no new data yet).
+1. Final PDF compile and proofread; upload to Zenodo (DOI 10.5281/zenodo.20645403).
+2. Attach `results/` tarball to Zenodo release (gitignored locally; reproducible via `experiments.sweep all`).
+3. Tag GitHub release (e.g. `v1.0.0`) linked to Zenodo deposit.
+4. Optional: refresh README PNGs from current runs; regenerate `training_results.png`.
+5. Phase 4 items only if extending claims (implicit target, cross-SDK, curriculum).
 
 ---
 
@@ -296,12 +297,12 @@ That package supports either a solid **software + methods paper** or a stronger 
 
 | Criterion | Assessment |
 |-----------|------------|
-| Scientifically sound | Yes, with limited scope |
+| Scientifically sound | Yes, with explicit Limitations |
 | Conceptually useful | Yes |
-| QML research novelty | No (as of demo scope) |
+| QML research novelty | No (implementation + empirical study) |
 | Practitioner value | Medium–high (JAX + QSP pattern) |
-| Top-tier venue ready | No — needs Phase 2 experiments |
-| Tutorial / software venue ready | Yes, after Phase 1 hardening |
+| Top-tier venue ready | No — scope is empirical / software note |
+| Zenodo + GitHub release ready | **Yes** — Phase 2/3 complete |
 
 **Strategy:** Embrace the honest scope, then **expand evidence** until claims and experiments match. The JAX traceability contribution plus rigorous baselines and scaling data is a defensible, self-contained story — more so than claiming a new quantum ML paradigm.
 

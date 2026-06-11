@@ -17,6 +17,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Entries refere
 - Analytic baselines report **mapped** flat-circuit MSE as primary metric; unmapped retained.
 - PennyLane mapped metrics use shared Chebyshev→pyqsp→flat bridge at all degrees (AUD-019).
 - `RESEARCH_PLAN.md`: Phase 2 marked complete.
+- **Manuscript Phase 3:** author name (Vladimiros Peilivanidis), shorter abstract, self-contained figures via `manuscript_numbers.tex`, DOI/ORCID badges; README and docs synced.
+- Short hyperparameter ablation subsection in paper (§4.3) + README; figure fixes (scaling, legend, baseline plot).
 
 ### Fixed
 - Convention mismatch (AUD-003, AUD-013): `phi_flat = pi/2 - phi_chao`.

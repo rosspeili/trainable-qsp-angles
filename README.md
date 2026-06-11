@@ -1,11 +1,15 @@
-# Trainable QSP Angles
+# Learning QSP Phase Angles via Gradient Descent
 
-Research code and manuscript for **learning Quantum Signal Processing (QSP) phase angles via gradient descent** — a framework-agnostic method (flat differentiable circuit + JAX + Optax), with a **PennyLane reference implementation** in `qsp_jax/`.
+**A reproducible empirical study with JAX-traceable circuits**
+
+Research code and manuscript for learning Quantum Signal Processing (QSP) phase angles by gradient descent — a framework-agnostic method (flat differentiable circuit + JAX + Optax), with a **PennyLane reference implementation** in `qsp_jax/`.
 
 This repository is the canonical home for the paper, reproducible experiments, notebooks, and tests. It evolved from the earlier [PennyLane community demo](https://github.com/rosspeili/qsp-pennylane-demo) but is maintained here as a standalone research project.
 
 <div align="center">
 
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20645403-ddd6fe?style=flat-square)](https://doi.org/10.5281/zenodo.20645403)
+[![ORCID](https://img.shields.io/badge/ORCID-0009--0003--0121--465X-fce7f3?style=flat-square)](https://orcid.org/0009-0003-0121-465X)
 [![License](https://img.shields.io/badge/License-Apache_2.0-efcefa?style=flat-square)](LICENSE)
 ![Python](https://img.shields.io/badge/Python-3.13%2B-bae6fd?style=flat-square)
 ![JAX](https://img.shields.io/badge/JAX-0.4.25%2B-a5f3fc?style=flat-square)
@@ -17,9 +21,9 @@ This repository is the canonical home for the paper, reproducible experiments, n
 
 ## Author
 
-**Ross Peili** (Vladimiros Peilivanidis)  
+**Vladimiros Peilivanidis**  
 ARPA Hellenic Logical Systems, Thessaloniki, Greece  
-[vpeilivanidis@gmail.com](mailto:vpeilivanidis@gmail.com)
+[r1@arpacorp.net](mailto:r1@arpacorp.net) · [ORCID 0009-0003-0121-465X](https://orcid.org/0009-0003-0121-465X)
 
 ---
 
@@ -30,8 +34,8 @@ Quantum Signal Processing encodes polynomial transformations of a scalar signal 
 Primary contributions (current state):
 
 - A **JAX-traceable flat QSP circuit** (avoiding high-level QSVT templates that capture concrete values and break gradients — documented first in our PennyLane reference code)
-- A **reproducible degree-5 benchmark** (Chebyshev approximation of `sin(x)`)
-- The accompanying **manuscript** (`manuscript.tex`) and **research roadmap** (`RESEARCH_PLAN.md`)
+- A **reproducible degree-5 benchmark** (Chebyshev approximation of `sin(x)`) with multi-seed, scaling, and analytic baselines (PennyLane + Chao/pyqsp)
+- The accompanying **manuscript** (`manuscript.tex`, self-contained via `manuscript_numbers.tex`) and **research roadmap** (`RESEARCH_PLAN.md`)
 
 See `docs/FRAMEWORKS.md` for when PennyLane is the right tool here vs. Qiskit, Cirq, TensorFlow Quantum, OpenFermion, or standalone analytic solvers.
 
@@ -72,7 +76,10 @@ py -3.13 -m experiments.sweep ablation
 # Comparison table + loss curve for paper/notebooks
 py -3.13 -m experiments.summarize baseline
 
-# Export pgfplots data for manuscript.tex
+# Regenerate hardcoded TeX figure numbers (manuscript_numbers.tex)
+py -3.13 -m experiments.generate_manuscript_numbers
+
+# Optional: legacy pgfplots .dat export (not required to compile manuscript.tex)
 py -3.13 -m experiments.export_manuscript_figures
 
 # Append an audit entry after a failed run or significant fix
@@ -83,7 +90,18 @@ py -3.13 -m experiments.audit list --last 10
 
 Analysis notebooks (after sweeps): `notebooks/01_baseline_comparison.ipynb`, `notebooks/02_scaling_study.ipynb`.
 
-JSON outputs go to `results/` (see `results/schema.json`).
+JSON outputs go to `results/` (gitignored; see `results/schema.json`). Hardcoded paper values live in `manuscript_numbers.tex` (committed).
+
+### Build the paper
+
+```bash
+pdflatex manuscript.tex
+biber manuscript
+pdflatex manuscript.tex
+pdflatex manuscript.tex
+```
+
+No external `.dat` files are required; figures use coordinates from `manuscript_numbers.tex`.
 
 ---
 
@@ -97,7 +115,8 @@ trainable-qsp-angles/
 │   │   ├── LOG.jsonl       # Append-only machine audit log (committed)
 │   │   └── README.md       # How to append audit entries
 │   └── FRAMEWORKS.md       # Stack choices; PennyLane as ref. impl., not exclusive
-├── manuscript.tex          # Paper source
+├── manuscript.tex          # Paper source (self-contained figures)
+├── manuscript_numbers.tex  # Hardcoded result coordinates (from results/)
 ├── references.bib          # Bibliography
 ├── RESEARCH_PLAN.md        # Analysis, gaps, and experimental roadmap
 ├── experiments/
@@ -105,11 +124,12 @@ trainable-qsp-angles/
 │   ├── train.py
 │   ├── baseline_analytic.py
 │   ├── sweep.py
-│   └── summarize.py
+│   ├── summarize.py
+│   └── generate_manuscript_numbers.py
 ├── notebooks/
 │   ├── 01_baseline_comparison.ipynb
 │   └── 02_scaling_study.ipynb
-├── results/                # Generated run outputs (gitignored except .gitkeep)
+├── results/                # Generated run outputs (gitignored except schema)
 ├── demo.ipynb              # Interactive training demo
 ├── target_polynomial.png   # Benchmark figure (also in demo.ipynb)
 ├── training_results.png
@@ -119,8 +139,6 @@ trainable-qsp-angles/
 │   ├── convention.py       # Phase maps (pyqsp/PL -> flat circuit)
 │   └── circuit.py          # Flat QSP circuit, target poly, loss
 ├── tests/
-│   ├── test_circuit.py
-│   └── test_chao_baseline.py
 ├── requirements.txt
 ├── LICENSE                 # Apache 2.0
 └── NOTICE                  # Attribution requirements
@@ -145,12 +163,18 @@ The default target is a **degree-5 Chebyshev approximation of `sin(x)`** on `[-1
 
 ![Target polynomial vs. sin(x)](target_polynomial.png)
 
-After 500 Adam steps (lr=0.05, 64-point grid), typical results:
+After 500 Adam steps (lr=0.05, 64-point grid), Phase 2 reference results (seed 0, from `results/paper/`):
 
-- **Final MSE**: ~4.82×10⁻⁴
-- **Max pointwise error**: ~9.83×10⁻² (vs. target polynomial, not vs. `sin(x)` directly)
+- **Train MSE**: $9.6 \times 10^{-5}$
+- **Hold-out MSE**: $1.66 \times 10^{-3}$
+- **Max pointwise error**: $3.42 \times 10^{-2}$ (vs. target polynomial)
+- **Mapped analytic baselines** (same flat circuit): $4.7 \times 10^{-3}$ train MSE
 
-Loss drops from ~1.44 (random initialization) to ~6.4×10⁻⁴, converging quickly within the first 100 steps.
+Multi-seed ($n=30$): median train MSE $6.3 \times 10^{-5}$; all seeds below $10^{-3}$.
+
+**Hyperparameter ablation** (18 configs, seed 0; `results/ablation/`): learning rate $\in \{0.01, 0.05, 0.1\}$, grid $\in \{32, 64, 128\}$, init $\in \pm[0.5, 1.0]$ — all runs below $10^{-3}$ train MSE (range $3.7 \times 10^{-5}$–$1.8 \times 10^{-4}$). Default protocol is representative, not cherry-picked.
+
+Loss drops from ~1.36 (random initialization) to ~$9.6 \times 10^{-5}$ within 500 steps.
 
 ![Training loss and learned polynomial](training_results.png)
 
@@ -162,9 +186,11 @@ This work is **free and open source** under [Apache 2.0](LICENSE).
 
 If you use this repository **in whole or in part** — code, snippets, notebooks, figures, data, or the LaTeX manuscript — you **must attribute**:
 
-> Ross Peili (Vladimiros Peilivanidis), ARPA Hellenic Logical Systems
+> Vladimiros Peilivanidis, ARPA Hellenic Logical Systems
 
 See [NOTICE](NOTICE) for the full attribution text and suggested citation.
+
+**Cite:** [DOI 10.5281/zenodo.20645403](https://doi.org/10.5281/zenodo.20645403) (Zenodo) · [GitHub repository](https://github.com/rosspeili/trainable-qsp-angles)
 
 ---
 

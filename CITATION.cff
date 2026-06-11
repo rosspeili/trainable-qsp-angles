@@ -1,14 +1,16 @@
 cff-version: 1.2.0
-title: Trainable QSP Angles
+title: "Learning QSP Phase Angles via Gradient Descent"
 message: "If you use this software, please cite it as below."
 authors:
-  - given-names: Ross
-    family-names: Peili
-    name-particle: Vladimiros Peilivanidis
-    email: vpeilivanidis@gmail.com
+  - given-names: Vladimiros
+    family-names: Peilivanidis
+    email: r1@arpacorp.net
     affiliation: ARPA Hellenic Logical Systems
+    orcid: "https://orcid.org/0009-0003-0121-465X"
 repository-code: "https://github.com/rosspeili/trainable-qsp-angles"
 license: Apache-2.0
+doi: 10.5281/zenodo.20645403
+url: "https://doi.org/10.5281/zenodo.20645403"
 keywords:
   - quantum signal processing
   - QSP
@@ -18,9 +20,9 @@ keywords:
 preferred-citation:
   type: software
   authors:
-    - given-names: Ross
-      family-names: Peili
-      name-particle: Vladimiros Peilivanidis
-  title: "Trainable QSP Angles: Learning Quantum Signal Processing Phase Angles via Gradient Descent"
+    - given-names: Vladimiros
+      family-names: Peilivanidis
+  title: "Learning QSP Phase Angles via Gradient Descent: A Reproducible Empirical Study"
   year: 2026
-  url: "https://github.com/rosspeili/trainable-qsp-angles"
+  doi: 10.5281/zenodo.20645403
+  url: "https://doi.org/10.5281/zenodo.20645403"
