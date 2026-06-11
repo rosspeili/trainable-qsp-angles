@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
@@ -10,6 +11,8 @@ import jax.numpy as jnp
 import optax
 
 from qsp_jax.circuit import loss_fn
+
+SCHEMA_VERSION = "1.0.0"
 
 
 @dataclass(frozen=True)
@@ -42,10 +45,13 @@ class TrainResult:
     loss_final: float
     loss_history: list[float] = field(default_factory=list)
     metrics: dict[str, float] = field(default_factory=dict)
+    train_time_s: float = 0.0
+    gradient_norm_final: float = 0.0
 
     def to_dict(self) -> dict[str, Any]:
         payload = asdict(self)
         payload["config"] = asdict(self.config)
+        payload["schema_version"] = SCHEMA_VERSION
         return payload
 
 
@@ -59,7 +65,7 @@ def init_phases(key: jax.Array, n_phases: int, low: float, high: float) -> jnp.n
     return jax.random.uniform(key, shape=(n_phases,), minval=low, maxval=high)
 
 
-def train(config: TrainConfig | None = None) -> TrainResult:
+def train(config: TrainConfig | None = None, verbose: bool = True) -> TrainResult:
     """
     Run Adam optimization on QSP phase angles.
 
@@ -79,26 +85,30 @@ def train(config: TrainConfig | None = None) -> TrainResult:
 
     phases = init_phases(key, n_phases, cfg.init_min, cfg.init_max)
     phases_init = [float(x) for x in phases]
-    loss_init = float(loss_fn(phases, xs_train))
+    loss_init = float(loss_fn(phases, xs_train, degree=cfg.degree))
 
     optimizer = optax.adam(cfg.learning_rate)
     opt_state = optimizer.init(phases)
 
     @jax.jit
     def step(phases, opt_state):
-        loss, grads = jax.value_and_grad(loss_fn)(phases, xs_train)
+        loss, grads = jax.value_and_grad(lambda p: loss_fn(p, xs_train, degree=cfg.degree))(phases)
         updates, opt_state_new = optimizer.update(grads, opt_state)
         phases_new = optax.apply_updates(phases, updates)
-        return phases_new, opt_state_new, loss
+        return phases_new, opt_state_new, loss, grads
 
     loss_history: list[float] = []
+    t0 = time.perf_counter()
+    final_grads = jnp.zeros_like(phases)
+
     for step_idx in range(cfg.steps):
-        phases, opt_state, loss = step(phases, opt_state)
+        phases, opt_state, loss, final_grads = step(phases, opt_state)
         loss_history.append(float(loss))
-        if step_idx % cfg.log_every == 0 or step_idx == cfg.steps - 1:
+        if verbose and (step_idx % cfg.log_every == 0 or step_idx == cfg.steps - 1):
             print(f"Step {step_idx:4d} | loss = {float(loss):.6f}")
 
-    metrics = evaluate_phases(phases, xs_train, xs_holdout)
+    train_time = time.perf_counter() - t0
+    metrics = evaluate_phases(phases, xs_train, xs_holdout, degree=cfg.degree)
 
     return TrainResult(
         config=cfg,
@@ -108,4 +118,6 @@ def train(config: TrainConfig | None = None) -> TrainResult:
         loss_final=float(loss_history[-1]),
         loss_history=loss_history,
         metrics=metrics,
+        train_time_s=train_time,
+        gradient_norm_final=float(jnp.linalg.norm(final_grads)),
     )

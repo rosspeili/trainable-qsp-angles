@@ -3,7 +3,7 @@
 **Project:** Trainable QSP Angles  
 **Author:** Ross Peili (Vladimiros Peilivanidis) — ARPA Hellenic Logical Systems  
 **Repository:** [github.com/rosspeili/trainable-qsp-angles](https://github.com/rosspeili/trainable-qsp-angles)  
-**Status:** Initial replication from PennyLane demo → research-grade artifact (in progress)
+**Status:** Phase 1 complete; Phase 2 experiment pipeline implemented (run sweeps locally)
 
 ---
 
@@ -135,20 +135,23 @@ These are answerable with code in this repo and would materially strengthen the 
 
 ### 5.3 Training protocol (fixed for comparability)
 
-Document in `experiments/configs/default.yaml`:
+Document in `experiments/configs/default.json`:
 
-```yaml
-optimizer: adam
-learning_rate: 0.05
-steps: 500
-grid_points: 64
-grid_range: [-0.95, 0.95]
-init_uniform: [-0.5, 0.5]
-jax_x64: true
-seeds: [0, 1, 2, ..., 29]
-degrees: [5, 7, 10, 15, 20]
-success_mse_threshold: 1.0e-3
-holdout_points: 512
+```json
+{
+  "optimizer": "adam",
+  "learning_rate": 0.05,
+  "steps": 500,
+  "n_signal_points": 64,
+  "grid_min": -0.95,
+  "grid_max": 0.95,
+  "init_min": -0.5,
+  "init_max": 0.5,
+  "seeds": [0, 1, "... ", 29],
+  "degrees": [5, 7, 9, 15, 21],
+  "success_mse_threshold": 0.001,
+  "holdout_points": 512
+}
 ```
 
 ### 5.4 Metrics (report all)
@@ -176,29 +179,29 @@ Each hypothesis gets a pre-registered config file before running sweeps.
 ### Phase 0 — Foundation ✅ (this commit)
 
 - [x] Standalone repo structure from demo
-- [x] `.gitignore` excludes local `qsp-pennylane-demo/` reference
 - [x] LICENSE + NOTICE attribution
 - [x] README aligned with research focus
 - [x] This plan document
 
-### Phase 1 — Reproducibility hardening (1–2 weeks)
+### Phase 1 — Reproducibility hardening ✅
 
-- [ ] `experiments/train.py` — CLI training with seed, degree, steps from YAML
-- [ ] `experiments/baseline_analytic.py` — analytic phase computation + eval
-- [ ] `results/` JSON schema for run metadata
-- [ ] Extend tests: QSVT-breaks-JAX regression test; hold-out eval helper
-- [ ] GitHub Actions: `pytest tests/`
-- [ ] Update `demo.ipynb` to import shared training module (no duplicated logic)
-- [ ] Fix manuscript author/email/repo links; soften overclaims in abstract
+- [x] `experiments/train.py` — CLI training with seed, degree, steps from JSON protocol
+- [x] `experiments/baseline_analytic.py` — analytic phase computation + eval
+- [x] `results/schema.json` for run metadata
+- [x] Extend tests: JAX traceability regression; hold-out / reproducibility tests
+- [x] GitHub Actions: `pytest tests/` (fast suite; `-m "not slow"`)
+- [x] Update `demo.ipynb` to import shared training module
+- [x] Fix manuscript author/email/repo links; soften overclaims in abstract
 
-### Phase 2 — Core experiments (2–4 weeks)
+### Phase 2 — Core experiments (in progress)
 
-- [ ] Multi-seed sweep T1 at d=5 (reproduce paper numbers from script)
-- [ ] Baseline comparison table (analytic vs learned)
-- [ ] Degree scaling d ∈ {5, 7, 10, 15, 20}
-- [ ] Ablation: lr, grid size, init range
-- [ ] Notebooks: `notebooks/01_baseline_comparison.ipynb`, `02_scaling_study.ipynb`
-- [ ] Regenerate paper figures from `results/` (pgfplots data export)
+- [x] Multi-seed sweep T1 (`experiments/sweep.py multi-seed`)
+- [x] Baseline comparison table (`experiments/summarize.py baseline`)
+- [x] Degree scaling d ∈ {5, 7, 10, 15, 20} (`experiments/sweep.py scaling`)
+- [x] Ablation: lr, grid size, init range (`experiments/sweep.py ablation`)
+- [x] Notebooks: `notebooks/01_baseline_comparison.ipynb`, `02_scaling_study.ipynb`
+- [x] Paper curve export: `results/paper/loss_curve_d5_seed0.json`
+- [ ] Regenerate manuscript pgfplots from exported JSON (Phase 3)
 
 ### Phase 3 — Paper upgrade (2–3 weeks)
 

@@ -51,12 +51,27 @@ Regenerate figures with `demo.ipynb`, or use the committed assets below.
 
 ### Reproducible experiments
 
+Protocol defaults: `experiments/configs/default.json`
+
 ```bash
-py -3.13 experiments/train.py --seed 0 --steps 500
-py -3.13 experiments/baseline_analytic.py
+# Single training run → results/*.json
+py -3.13 -m experiments.train --seed 0 --steps 500
+
+# Analytic baseline (PennyLane poly_to_angles)
+py -3.13 -m experiments.baseline_analytic
+
+# Phase 2 sweeps (use --quick for smoke tests)
+py -3.13 -m experiments.sweep multi-seed
+py -3.13 -m experiments.sweep scaling
+py -3.13 -m experiments.sweep ablation
+
+# Comparison table + loss curve for paper/notebooks
+py -3.13 -m experiments.summarize baseline
 ```
 
-JSON outputs are written to `results/`.
+Analysis notebooks (after sweeps): `notebooks/01_baseline_comparison.ipynb`, `notebooks/02_scaling_study.ipynb`.
+
+JSON outputs go to `results/` (see `results/schema.json`).
 
 ---
 
@@ -68,8 +83,14 @@ trainable-qsp-angles/
 ├── references.bib          # Bibliography
 ├── RESEARCH_PLAN.md        # Analysis, gaps, and experimental roadmap
 ├── experiments/
-│   ├── train.py            # CLI: gradient training → results/*.json
-│   └── baseline_analytic.py
+│   ├── configs/default.json
+│   ├── train.py
+│   ├── baseline_analytic.py
+│   ├── sweep.py
+│   └── summarize.py
+├── notebooks/
+│   ├── 01_baseline_comparison.ipynb
+│   └── 02_scaling_study.ipynb
 ├── results/                # Generated run outputs (gitignored except .gitkeep)
 ├── demo.ipynb              # Interactive training demo
 ├── target_polynomial.png   # Benchmark figure (also in demo.ipynb)

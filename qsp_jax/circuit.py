@@ -98,7 +98,7 @@ def qsp_circuit(phases, x):
 # ---------------------------------------------------------------------------
 
 
-def loss_fn(phases, xs):
+def loss_fn(phases, xs, degree: int = 5):
     """
     Mean squared error between the QSP circuit output and the target polynomial.
 
@@ -108,6 +108,8 @@ def loss_fn(phases, xs):
         QSP phase angles in radians.
     xs : jnp.ndarray, shape (N,)
         Grid of signal values in [-1, 1].
+    degree : int
+        Target polynomial degree (must match len(phases) - 1).
 
     Returns
     -------
@@ -115,5 +117,5 @@ def loss_fn(phases, xs):
         Scalar MSE loss.
     """
     circuit_vals = jax.vmap(lambda x: qsp_circuit(phases, x))(xs)
-    target_vals = target_poly(xs)
+    target_vals = target_poly(xs, degree=degree)
     return jnp.mean((circuit_vals - target_vals) ** 2)

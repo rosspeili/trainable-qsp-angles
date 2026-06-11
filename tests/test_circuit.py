@@ -106,7 +106,7 @@ def test_loss_fn_decreases_after_gradient_steps():
     loss_init = float(loss_fn(phases, XS))
 
     for _ in range(10):
-        grad = jax.grad(loss_fn)(phases, XS)
+        grad = jax.grad(lambda p: loss_fn(p, XS, degree=5))(phases)
         phases = phases - lr * grad
 
     loss_final = float(loss_fn(phases, XS))
