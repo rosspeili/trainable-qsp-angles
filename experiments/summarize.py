@@ -35,7 +35,8 @@ def export_baseline_comparison(output_dir: Path, degree: int = 5, seed: int = 0)
         "gradient_norm_final": learned.gradient_norm_final,
     }
     analytic_row = {
-        "method": "pennylane_poly_to_angles_iterative",
+        "method": "analytic_poly_to_angles",
+        "backend": "pennylane_iterative",
         "degree": degree,
         "seed": seed,
         "train_mse": analytic.metrics["train_mse"],

@@ -9,7 +9,7 @@
 
 ## 1. Executive Summary
 
-The core idea — **learning QSP phase angles by gradient descent on a differentiable flat circuit** — is theoretically sound and practically useful. The current manuscript and demo correctly implement the method, diagnose the PennyLane `qml.QSVT` + JAX tracing incompatibility, and reproduce a degree-5 Chebyshev target with plausible accuracy.
+The core idea — **learning QSP phase angles by gradient descent on a differentiable flat circuit** — is theoretically sound and practically useful. The reference code uses **PennyLane + JAX** (historical demo origin, `poly_to_angles` baseline, JAX QNode interface); the **method itself is SDK-agnostic** — see `docs/FRAMEWORKS.md`.
 
 However, **as a research contribution**, the work is currently an excellent **engineering note / tutorial**, not a novel QML result. Gradient-based optimization of differentiable quantum circuits has been possible since PennyLane (2018) and JAX-based QML stacks. The flat-circuit pattern is a necessary implementation fix, not a scientific discovery.
 
@@ -70,7 +70,7 @@ This document turns external review feedback into a concrete, reproducible plan 
 |------------------|---------|
 | `experiments/` scripts with fixed configs | Batch reproducibility |
 | `results/` versioned summary tables (CSV/JSON) | Paper numbers from code, not hand-typed |
-| Analytic solver wrapper | Baseline phases from Chao / PennyLane |
+| Analytic solver wrapper | Baseline phases via PennyLane `poly_to_angles` (convenience); Chao et al. standalone solver optional |
 | Multi-seed runner | Mean ± std over seeds |
 | Scaling sweep notebook | Degree vs success rate / MSE / time |
 | CI (pytest on push) | Regression guard |
@@ -84,9 +84,9 @@ This document turns external review feedback into a concrete, reproducible plan 
 These are answerable with code in this repo and would materially strengthen the paper.
 
 ### RQ1 — Implementation (already partially answered)
-> Does a flat PennyLane gate sequence preserve non-zero JAX gradients through QSP phase angles where `qml.QSVT` does not?
+> Does a flat gate sequence preserve non-zero JAX gradients through QSP phase angles where high-level QSVT templates (e.g. PennyLane `qml.QSVT`) do not?
 
-**Deliverable:** Minimal failing/passing test pair; documented in paper §3.3.
+**Deliverable:** Minimal failing/passing test pair; documented in paper §3.3. Optional: replicate in Qiskit/Cirq parameterized circuits.
 
 ### RQ2 — Equivalence at low degree
 > For admissible targets at degree d ≤ 10, can Adam reach analytic-solver accuracy (MSE and max error)?
@@ -129,9 +129,10 @@ These are answerable with code in this repo and would materially strengthen the 
 
 ### 5.2 Baselines
 
-1. **PennyLane `qp.poly_to_angles`** (when applicable) — fast sanity check.
-2. **Chao et al. QSP solver** — reference for machine-precision angles ([arXiv:2003.02831](https://arxiv.org/abs/2003.02831)); implement or vendor minimal Python port.
-3. **Random search / CMA-ES** (optional) — non-gradient baseline for ill-conditioned cases.
+1. **PennyLane `poly_to_angles`** (current convenience wrapper) — fast sanity check in-repo.
+2. **Chao et al. QSP solver** — reference for machine-precision angles independent of any QML SDK ([arXiv:2003.02831](https://arxiv.org/abs/2003.02831)).
+3. **Optional cross-SDK circuit eval** — same phases evaluated in Qiskit/Cirq for convention checks (`docs/FRAMEWORKS.md`).
+4. **Random search / CMA-ES** (optional) — non-gradient baseline for ill-conditioned cases.
 
 ### 5.3 Training protocol (fixed for comparability)
 
@@ -214,10 +215,12 @@ Each hypothesis gets a pre-registered config file before running sweeps.
 
 ### Phase 4 — Optional extensions (research frontier)
 
-- [ ] End-to-end VQA stub: QSP phases inside larger loss (demonstrate RQ2 motivation)
+- [ ] End-to-end VQA stub: QSP phases inside larger loss (demonstrate implicit-target motivation)
 - [ ] Curriculum over degree (warm-start φ from d−1)
 - [ ] Second-order optimizers (L-BFGS on small d)
 - [ ] QSVT block-encoding extension (multi-qubit flat pattern)
+- [ ] **Cross-framework validation** (Qiskit / Cirq / standalone Chao solver) — see `docs/FRAMEWORKS.md`
+- [ ] PennyLane-Lightning device for faster Phase 2 sweeps (same API, different backend)
 
 ---
 

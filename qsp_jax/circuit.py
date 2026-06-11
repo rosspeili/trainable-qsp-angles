@@ -1,14 +1,17 @@
 """
 circuit.py — QSP circuit, target polynomial, and loss function.
 
-The QSP sequence is implemented as a flat PennyLane circuit (manual interleaving
-of signal oracle and phase rotations). This preserves the JAX computation graph
-through the phase angles, making the circuit fully differentiable via jax.grad.
+The QSP sequence is implemented as a flat circuit (manual interleaving of signal
+oracle and phase rotations). This preserves the JAX computation graph through
+the phase angles, making the circuit fully differentiable via jax.grad.
 
-Note: qp.QSVT takes pre-built operator *objects* as arguments. Those objects
-capture concrete values at construction time, breaking JAX tracing. The manual
-flat-circuit approach avoids this and is the correct pattern for JAX-based
-variational optimization of QSP phase angles.
+This file uses PennyLane as the **reference quantum frontend** only. The flat
+sequence and loss are framework-agnostic; equivalent circuits can be built in
+Qiskit, Cirq, TensorFlow Quantum, etc. See docs/FRAMEWORKS.md.
+
+Note: high-level QSVT template APIs (e.g. PennyLane qp.QSVT) may capture
+concrete values at construction time and break JAX tracing. Inline primitives
+avoid this across SDKs when parameters stay in the autodiff graph.
 
 Reference:
     Martyn et al., "A Grand Unification of Quantum Algorithms",

@@ -1,6 +1,6 @@
 # Trainable QSP Angles
 
-Research code and manuscript for **learning Quantum Signal Processing (QSP) phase angles via gradient descent** — a differentiable, flat-circuit implementation using PennyLane, JAX, and Optax.
+Research code and manuscript for **learning Quantum Signal Processing (QSP) phase angles via gradient descent** — a framework-agnostic method (flat differentiable circuit + JAX + Optax), with a **PennyLane reference implementation** in `qsp_jax/`.
 
 This repository is the canonical home for the paper, reproducible experiments, notebooks, and tests. It evolved from the earlier [PennyLane community demo](https://github.com/rosspeili/qsp-pennylane-demo) but is maintained here as a standalone research project.
 
@@ -8,8 +8,8 @@ This repository is the canonical home for the paper, reproducible experiments, n
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-efcefa?style=flat-square)](LICENSE)
 ![Python](https://img.shields.io/badge/Python-3.13%2B-bae6fd?style=flat-square)
-![PennyLane](https://img.shields.io/badge/PennyLane-0.44%2B-e9d5ff?style=flat-square)
 ![JAX](https://img.shields.io/badge/JAX-0.4.25%2B-a5f3fc?style=flat-square)
+![PennyLane (ref.)](https://img.shields.io/badge/PennyLane-ref._impl.-e9d5ff?style=flat-square)
 
 </div>
 
@@ -29,11 +29,11 @@ Quantum Signal Processing encodes polynomial transformations of a scalar signal 
 
 Primary contributions (current state):
 
-- A **JAX-traceable flat QSP circuit** (avoiding `qml.QSVT` construction-time capture that breaks gradients)
+- A **JAX-traceable flat QSP circuit** (avoiding high-level QSVT templates that capture concrete values and break gradients — documented first in our PennyLane reference code)
 - A **reproducible degree-5 benchmark** (Chebyshev approximation of `sin(x)`)
 - The accompanying **manuscript** (`manuscript.tex`) and **research roadmap** (`RESEARCH_PLAN.md`)
 
-See `RESEARCH_PLAN.md` for the full gap analysis, experimental plan, and path from demo to publication-quality work.
+See `docs/FRAMEWORKS.md` for when PennyLane is the right tool here vs. Qiskit, Cirq, TensorFlow Quantum, OpenFermion, or standalone analytic solvers.
 
 ---
 
@@ -57,7 +57,7 @@ Protocol defaults: `experiments/configs/default.json`
 # Single training run → results/*.json
 py -3.13 -m experiments.train --seed 0 --steps 500
 
-# Analytic baseline (PennyLane poly_to_angles)
+# Analytic baseline (included convenience wrapper: PennyLane poly_to_angles; see docs/FRAMEWORKS.md for alternatives)
 py -3.13 -m experiments.baseline_analytic
 
 # Phase 2 sweeps (use --quick for smoke tests)
@@ -79,6 +79,8 @@ JSON outputs go to `results/` (see `results/schema.json`).
 
 ```
 trainable-qsp-angles/
+├── docs/
+│   └── FRAMEWORKS.md       # Stack choices; PennyLane as ref. impl., not exclusive
 ├── manuscript.tex          # Paper source
 ├── references.bib          # Bibliography
 ├── RESEARCH_PLAN.md        # Analysis, gaps, and experimental roadmap
@@ -113,7 +115,8 @@ trainable-qsp-angles/
 - **QSP sequence**: Flat alternating circuit — one phase rotation `RZ(-2*phi_k)` per signal query `W(x)`
 - **Polynomial encoding**: The expectation value `<X>` encodes a degree-d polynomial in `x` determined by the phase angles
 - **Training**: Adam (Optax) minimizes MSE between circuit output and target polynomial via `jax.grad`
-- **JAX note**: Implemented with inline `qp.RZ` + `qp.Hadamard` gates, not `qp.QSVT`, to preserve traceability
+- **Implementation note**: `qsp_jax/circuit.py` uses PennyLane primitives as the reference frontend; the same flat pattern applies in Qiskit, Cirq, TFQ, etc. (see `docs/FRAMEWORKS.md`)
+- **JAX note**: Use inline rotations, not opaque template objects that freeze parameters at build time
 
 ---
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CLI: analytic QSP angles via PennyLane and circuit evaluation."""
+"""CLI: analytic QSP angles (PennyLane wrapper by default; see docs/FRAMEWORKS.md)."""
 
 from __future__ import annotations
 

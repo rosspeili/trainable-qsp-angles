@@ -144,7 +144,7 @@
   {\LARGE\bfseries Learning Phase Angles for Quantum Signal Processing%
   \\ via Gradient Descent}\\[0.55em]
   {\normalsize\normalfont\color{accent}
-   A Differentiable Circuit Approach Using PennyLane, JAX, and Optax}
+   A Differentiable Circuit Approach — Reference Implementation with JAX and PennyLane}
 }
 
 \author{%
@@ -172,7 +172,7 @@
 \begin{minipage}{0.92\textwidth}
 \small
 \textbf{Abstract.}\quad
-Quantum Signal Processing (QSP) is a foundational algorithmic primitive that encodes polynomial transformations of a scalar signal into a single-qubit quantum circuit via a structured sequence of phase-shifted oracle calls. The canonical approach computes phase angles analytically from a target polynomial --- a well-studied but numerically sensitive problem. We present an empirical study of \emph{learning} QSP phase angles from random initialization using gradient-based optimization on a JAX-traceable flat PennyLane circuit, as an alternative when analytic solvers are unavailable or embedded in a larger differentiable pipeline. We train a degree-5 circuit to approximate a Chebyshev expansion of $\sin(x)$ via Adam, reaching a mean squared error of $4.82 \times 10^{-4}$ within 500 steps (single-seed benchmark; multi-seed statistics in the accompanying code). We identify and document a non-obvious incompatibility between PennyLane's \texttt{qml.QSVT} primitive and JAX tracing, and provide a flat-circuit implementation pattern that preserves end-to-end differentiability. Code, experiment scripts, and an interactive notebook are publicly available under the Apache~2.0 license.
+Quantum Signal Processing (QSP) is a foundational algorithmic primitive that encodes polynomial transformations of a scalar signal into a single-qubit quantum circuit via a structured sequence of phase-shifted oracle calls. The canonical approach computes phase angles analytically from a target polynomial --- a well-studied but numerically sensitive problem. We present an empirical study of \emph{learning} QSP phase angles from random initialization using gradient-based optimization on a JAX-traceable \emph{flat} circuit---independent of any particular quantum SDK, though we report a reference implementation in PennyLane. This route is useful when analytic solvers are unavailable or embedded in a larger differentiable pipeline. We train a degree-5 circuit to approximate a Chebyshev expansion of $\sin(x)$ via Adam, reaching a mean squared error of $4.82 \times 10^{-4}$ within 500 steps (single-seed benchmark; multi-seed statistics in the accompanying code). We identify and document a non-obvious incompatibility between high-level QSVT template APIs (exemplified by PennyLane's \texttt{qml.QSVT}) and JAX tracing, and provide a flat-circuit pattern that preserves end-to-end differentiability across frameworks. Code, experiment scripts, and an interactive notebook are publicly available under the Apache~2.0 license.
 
 \vspace{6pt}
 \noindent\textbf{Keywords:}\quad
@@ -183,7 +183,8 @@ differentiable quantum circuits $\cdot$
 gradient descent $\cdot$
 Chebyshev polynomial approximation $\cdot$
 automatic differentiation $\cdot$
-PennyLane $\cdot$ JAX
+JAX $\cdot$
+differentiable quantum programming
 \end{minipage}
 \end{center}
 
@@ -209,11 +210,11 @@ The practical challenge is computing those phase angles. Given a target polynomi
 
 We explore a complementary approach: \emph{learning} phase angles from random initialization using gradient descent. The key observation is that a QSP circuit, when implemented correctly as a differentiable quantum program, admits automatic differentiation through all its parameters. This makes it possible to minimize any differentiable loss over the phase angles using standard optimizers.
 
-We demonstrate this via a publicly available implementation~\cite{peili_trainable_qsp_2026} built on PennyLane~\cite{pennylane2022} and JAX~\cite{jax2018github}. Along the way, we identify and resolve a non-obvious incompatibility between PennyLane's built-in QSVT primitive and JAX's tracing mechanism, and provide the correct flat-circuit implementation pattern.
+We demonstrate this via a publicly available reference implementation~\cite{peili_trainable_qsp_2026} using PennyLane~\cite{pennylane2022} with JAX~\cite{jax2018github}; the underlying flat-circuit recipe transfers to other SDKs such as Qiskit~\cite{qiskit2024}, Cirq~\cite{cirq2024}, or TensorFlow Quantum~\cite{broughton2020tfq} when parameters remain live in the autodiff graph. We identify and resolve a non-obvious incompatibility between template-based QSVT constructors and JAX tracing in our PennyLane code path, and provide the correct flat-circuit pattern.
 
 \begin{tcolorbox}[contribbox]
 \begin{itemize}\setlength\itemsep{3pt}
-  \item[\textbf{C1.}] We identify that PennyLane's \texttt{qml.QSVT} primitive captures operator values at circuit-build time, breaking JAX differentiability through phase angles, and provide a flat-circuit workaround that preserves end-to-end gradient flow.
+  \item[\textbf{C1.}] We show that high-level QSVT template APIs can capture operator values at circuit-build time, breaking JAX differentiability through phase angles (observed in PennyLane's \texttt{qml.QSVT}), and provide a flat-circuit workaround that preserves end-to-end gradient flow.
   \item[\textbf{C2.}] We provide a reproducible degree-5 benchmark (Chebyshev $\sin$ target) with experiment scripts, reporting convergence from MSE $\approx 1.44$ to $4.82\times10^{-4}$ in 500 Adam steps for the reference seed.
   \item[\textbf{C3.}] We provide a practical decision guide for when gradient training is preferable to analytic angle computation.
   \item[\textbf{C4.}] All code, experiments, and an interactive notebook are released under the Apache~2.0 license at \href{https://github.com/rosspeili/trainable-qsp-angles}{\texttt{github.com/rosspeili/trainable-qsp-angles}}.
@@ -443,9 +444,9 @@ with $c_1=0.9775$, $c_3=-0.1564$, $c_5=0.0158$. This polynomial is odd, bounded 
 
 \subsection{Circuit Implementation and the JAX Traceability Constraint}
 
-PennyLane's \texttt{qml.QSVT} primitive constructs operator objects at circuit-build time, capturing concrete numerical values that exit JAX's abstract trace and produce zero gradients through the phase angles. The fix is a \emph{flat circuit} of primitive gates, keeping phase angles as live JAX arrays throughout:
+High-level QSVT template constructors---including PennyLane's \texttt{qml.QSVT}---can build operator objects at circuit definition time, capturing concrete numerical values that exit JAX's abstract trace and produce zero gradients through the phase angles. The fix is a \emph{flat circuit} of primitive gates, keeping phase angles as live JAX arrays throughout. The same principle applies in other frameworks whenever templates materialize parameters before autodiff sees them.
 
-\begin{lstlisting}[caption={Flat-circuit QSP implementation. Expanding each oracle $W(x)=H\,R_Z\,H$ inline preserves end-to-end JAX differentiability. Note: the source uses \texttt{import pennylane as qp}; \texttt{qml} is the conventional alias used in PennyLane documentation.}, label={lst:circuit}]
+\begin{lstlisting}[caption={Reference flat-circuit QSP implementation (PennyLane + JAX). The structure is portable; only the gate API differs in Qiskit, Cirq, or TFQ.}, label={lst:circuit}]
 import pennylane as qp
 
 @qp.qnode(dev, interface="jax", diff_method="backprop")
@@ -467,14 +468,15 @@ def qsp_qnode(phases, x):
   \toprule
   \textbf{Component} & \textbf{Tool} & \textbf{Role} \\
   \midrule
-  Quantum simulation  & PennyLane 0.44+   & QNode execution and gate library \\
+  Quantum simulation (reference) & PennyLane 0.44+   & Differentiable QNode frontend; plugins available for Qiskit/Cirq/others \\
+  Analytic baseline (optional)   & \texttt{poly\_to\_angles} & Convenience wrapper; Chao et al.\ solver usable independently \\
   Automatic diff.     & JAX 0.4.25+ (x64) & Gradient computation and JIT compilation \\
   Optimization        & Optax (Adam)       & Parameter updates, lr~$=0.05$, 500 steps \\
   Vectorization       & \texttt{jax.vmap} & Parallel evaluation over the signal grid \\
   Precision           & float64            & Numerical stability of $\arccos$ near $\pm 1$ \\
   \bottomrule
 \end{tabularx}
-\caption{Technology stack. All components interoperate through JAX's functional transformation interface~\cite{peili_trainable_qsp_2026}.}
+\caption{Technology stack for the reference implementation. PennyLane is not mandatory for the method; see repository documentation for alternative SDKs.}
 \label{tab:stack}
 \end{table}
 
@@ -622,7 +624,7 @@ The QSP loss landscape is non-convex. At degree~5, a single random seed with sma
 
 \subsection{The JAX Traceability Constraint}
 
-The flat-circuit pattern described in Section~3.3 is the correct workaround for JAX-based variational optimization of QSP circuits, and is expected to generalize to multi-qubit block-encoding extensions. JAX transforms functions by tracing them with abstract values; any component that captures concrete arrays at construction time exits the trace. This is not a PennyLane bug --- it is a consequence of JAX's design --- but it is a non-obvious pitfall for practitioners combining the two frameworks.
+The flat-circuit pattern described in Section~3.3 is the correct workaround for JAX-based variational optimization of QSP circuits, and is expected to generalize to multi-qubit block-encoding extensions and to other quantum SDKs when the same traceability rules are respected. JAX transforms functions by tracing them with abstract values; any component that captures concrete arrays at construction time exits the trace. This is not unique to PennyLane---it is a general pitfall for template-heavy circuit APIs combined with JAX-style AD.
 
 \subsection{Reproducibility}
 

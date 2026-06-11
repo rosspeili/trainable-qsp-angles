@@ -13,8 +13,8 @@ keywords:
   - quantum signal processing
   - QSP
   - JAX
+  - differentiable quantum circuits
   - PennyLane
-  - gradient descent
 preferred-citation:
   type: software
   authors:

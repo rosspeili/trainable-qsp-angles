@@ -1,4 +1,4 @@
-"""Analytic QSP phase angles via PennyLane ``poly_to_angles``."""
+"""Analytic QSP phase angles — baseline solvers (PennyLane wrapper + notes on alternatives)."""
 
 from __future__ import annotations
 
@@ -35,6 +35,10 @@ class AnalyticResult:
 def analytic_phases(degree: int = 5, angle_solver: str = "iterative") -> tuple[jnp.ndarray, str, float]:
     """
     Compute QSP phase angles for the Chebyshev-sin target at ``degree``.
+
+    Uses PennyLane ``poly_to_angles`` as an in-repo convenience wrapper.
+    For SDK-independent angles, a standalone Chao et al. implementation is
+    preferable (see docs/FRAMEWORKS.md).
 
     Notes
     -----
