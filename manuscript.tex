@@ -45,6 +45,7 @@
                 positioning, calc, fit, backgrounds}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
+\usepgfplotslibrary{groupplots,statistics}
 
 %% --- Captions ---
 \usepackage[
@@ -72,7 +73,7 @@
 \pagestyle{fancy}
 \fancyhf{}
 \fancyhead[L]{\small\color{graytext}R. Peili}
-\fancyhead[R]{\small\color{graytext}Learning Phase Angles for QSP via Gradient Descent}
+\fancyhead[R]{\small\color{graytext}Learning QSP Phase Angles --- Empirical Study}
 \fancyfoot[C]{\small\thepage}
 \renewcommand{\headrulewidth}{0.3pt}
 \renewcommand{\footrulewidth}{0pt}
@@ -141,10 +142,10 @@
 %% ============================================================
 \title{%
   \vspace{-0.5cm}%
-  {\LARGE\bfseries Learning Phase Angles for Quantum Signal Processing%
+  {\LARGE\bfseries Learning Quantum Signal Processing Phase Angles%
   \\ via Gradient Descent}\\[0.55em]
   {\normalsize\normalfont\color{accent}
-   A Differentiable Circuit Approach — Reference Implementation with JAX and PennyLane}
+   A Reproducible Empirical Study with JAX-Traceable Circuits}
 }
 
 \author{%
@@ -155,11 +156,11 @@
 }
 
 \date{%
-  \small Draft, June 2026\quad|\quad
+  \small June 2026\quad|\quad
   {\normalfont\color{graytext}%
    Code: \href{https://github.com/rosspeili/trainable-qsp-angles}{\texttt{github.com/rosspeili/trainable-qsp-angles}}
    \quad|\quad
-   Notebook: \texttt{demo.ipynb}}%
+   Data: \href{https://doi.org/10.5281/zenodo.20645403}{10.5281/zenodo.20645403}}%
 }
 
 \begin{document}
@@ -172,7 +173,7 @@
 \begin{minipage}{0.92\textwidth}
 \small
 \textbf{Abstract.}\quad
-Quantum Signal Processing (QSP) is a foundational algorithmic primitive that encodes polynomial transformations of a scalar signal into a single-qubit quantum circuit via a structured sequence of phase-shifted oracle calls. The canonical approach computes phase angles analytically from a target polynomial --- a well-studied but numerically sensitive problem. We present an empirical study of \emph{learning} QSP phase angles from random initialization using gradient-based optimization on a JAX-traceable \emph{flat} circuit---independent of any particular quantum SDK, though we report a reference implementation in PennyLane. This route is useful when analytic solvers are unavailable or embedded in a larger differentiable pipeline. We train a degree-5 circuit to approximate a Chebyshev expansion of $\sin(x)$ via Adam, reaching a mean squared error of $4.82 \times 10^{-4}$ within 500 steps (single-seed benchmark; multi-seed statistics in the accompanying code). We identify and document a non-obvious incompatibility between high-level QSVT template APIs (exemplified by PennyLane's \texttt{qml.QSVT}) and JAX tracing, and provide a flat-circuit pattern that preserves end-to-end differentiability across frameworks. Code, experiment scripts, and an interactive notebook are publicly available under the Apache~2.0 license.
+Quantum Signal Processing (QSP) is a foundational algorithmic primitive that encodes polynomial transformations of a scalar signal into a single-qubit quantum circuit via a structured sequence of phase-shifted oracle calls. The canonical approach computes phase angles analytically from a target polynomial---a well-studied but numerically sensitive problem. We present a reproducible \emph{empirical study} of \emph{learning} QSP phase angles from random initialization using gradient-based optimization on a JAX-traceable \emph{flat} circuit (PennyLane is used only as a reference frontend). We benchmark a degree-5 Chebyshev approximation of $\sin(x)$ with Adam over 500 steps, multi-seed replication ($n=30$), degree scaling, and analytic baselines (PennyLane \texttt{poly\_to\_angles} and Chao et al.\ via \texttt{pyqsp}). For the reference seed, training reaches train MSE $9.6\times10^{-5}$; mapped analytic baselines on the same flat circuit achieve $\approx4.7\times10^{-3}$. We document phase-convention mapping between solver output and the training circuit, identify a QSVT-template pitfall for JAX tracing, and release experiment scripts, audit logs, and figure data under Apache~2.0 (Zenodo: \href{https://doi.org/10.5281/zenodo.20645403}{10.5281/zenodo.20645403}).
 
 \vspace{6pt}
 \noindent\textbf{Keywords:}\quad
@@ -215,8 +216,8 @@ We demonstrate this via a publicly available reference implementation~\cite{peil
 \begin{tcolorbox}[contribbox]
 \begin{itemize}\setlength\itemsep{3pt}
   \item[\textbf{C1.}] We show that high-level QSVT template APIs can capture operator values at circuit-build time, breaking JAX differentiability through phase angles (observed in PennyLane's \texttt{qml.QSVT}), and provide a flat-circuit workaround that preserves end-to-end gradient flow.
-  \item[\textbf{C2.}] We provide a reproducible degree-5 benchmark (Chebyshev $\sin$ target) with experiment scripts, reporting convergence from MSE $\approx 1.44$ to $4.82\times10^{-4}$ in 500 Adam steps for the reference seed.
-  \item[\textbf{C3.}] We provide a practical decision guide for when gradient training is preferable to analytic angle computation.
+  \item[\textbf{C2.}] We provide a reproducible benchmark pipeline (30-seed statistics, scaling, ablations) for a degree-5 Chebyshev $\sin$ target, reporting convergence from MSE $\approx1.36$ to $9.6\times10^{-5}$ in 500 Adam steps (reference seed).
+  \item[\textbf{C3.}] We compare gradient training to analytic baselines on equal footing---including convention mapping for flat-circuit evaluation---and provide an updated decision guide grounded in measured trade-offs.
   \item[\textbf{C4.}] All code, experiments, and an interactive notebook are released under the Apache~2.0 license at \href{https://github.com/rosspeili/trainable-qsp-angles}{\texttt{github.com/rosspeili/trainable-qsp-angles}}.
 \end{itemize}
 \end{tcolorbox}
@@ -469,7 +470,7 @@ def qsp_qnode(phases, x):
   \textbf{Component} & \textbf{Tool} & \textbf{Role} \\
   \midrule
   Quantum simulation (reference) & PennyLane 0.44+   & Differentiable QNode frontend; plugins available for Qiskit/Cirq/others \\
-  Analytic baseline (optional)   & \texttt{poly\_to\_angles} & Convenience wrapper; Chao et al.\ solver usable independently \\
+  Analytic baselines (comparison) & PennyLane \texttt{poly\_to\_angles}, Chao/\texttt{pyqsp} & Mapped flat-circuit evaluation; native solver + audit metrics \\
   Automatic diff.     & JAX 0.4.25+ (x64) & Gradient computation and JIT compilation \\
   Optimization        & Optax (Adam)       & Parameter updates, lr~$=0.05$, 500 steps \\
   Vectorization       & \texttt{jax.vmap} & Parallel evaluation over the signal grid \\
@@ -486,13 +487,15 @@ Phase angles are initialized uniformly in $[-0.5,0.5]$. A uniform grid of 64 sig
 \section{Results}
 %% ============================================================
 
-\subsection{Convergence}
+All numerical values in this section are exported from \texttt{results/} via \texttt{experiments.export\_manuscript\_figures} into \texttt{manuscript\_data/} (reproducible with \texttt{py -3.13 -m experiments.summarize baseline} and \texttt{py -3.13 -m experiments.sweep all}).
 
-Starting from a random initialization with loss $\approx 1.44$, the Adam optimizer reduces the MSE by three orders of magnitude within the first 100 steps. By step 500, the learned phase angles are:
+\subsection{Convergence (Reference Seed)}
+
+Starting from random initialization (loss $\approx1.36$), Adam reduces train MSE by more than four orders of magnitude within 500 steps. The learned phase angles for seed~0 are
 \begin{equation}
-  \boldsymbol{\phi}^* \approx (-0.0733,\ -0.2631,\ -0.9651,\ 1.4105,\ 0.8982,\ -0.1731),
+  \boldsymbol{\phi}^* \approx (-0.0815,\ 1.1463,\ -0.1278,\ 0.1438,\ 0.1317,\ 0.0279),
 \end{equation}
-yielding a final MSE of $4.82\times10^{-4}$ and a maximum pointwise error of $9.83\times10^{-2}$ against $P_{\mathrm{target}}$.
+with train MSE $9.6\times10^{-5}$, hold-out MSE $1.66\times10^{-3}$, and maximum pointwise error $3.42\times10^{-2}$ against $P_{\mathrm{target}}$ on the training grid.
 
 \begin{figure}[ht]
 \centering
@@ -502,7 +505,7 @@ yielding a final MSE of $4.82\times10^{-4}$ and a maximum pointwise error of $9.
   xlabel={Training Step},
   ylabel={MSE Loss},
   xmin=0, xmax=520,
-  ymin=5e-5, ymax=8,
+  ymin=5e-5, ymax=3,
   xtick={0,100,200,300,400,500},
   grid=both,
   grid style={line width=0.3pt, draw=lightrule},
@@ -512,86 +515,180 @@ yielding a final MSE of $4.82\times10^{-4}$ and a maximum pointwise error of $9.
   xlabel style={font=\small},
   ylabel style={font=\small},
   tick label style={font=\small, color=graytext},
-  legend style={font=\small, at={(0.98,0.95)}, anchor=north east,
-                draw=lightrule, fill=white},
 ]
-\addplot[accent, thick] coordinates {
-  (0,1.44) (1,1.10) (2,0.75) (3,0.48) (4,0.28)
-  (5,0.18) (6,0.12) (7,0.080) (8,0.055) (9,0.038)
-  (10,0.050) (11,0.042) (12,0.025) (13,0.015) (14,0.011)
-  (15,0.0115) (16,0.0120) (17,0.0090) (18,0.0060) (19,0.0050)
-  (20,0.0110) (21,0.0090) (22,0.0065) (23,0.0040) (24,0.0045)
-  (25,0.0055) (26,0.0058) (27,0.0062) (28,0.0068) (29,0.0075)
-  (30,0.0072) (31,0.0060) (32,0.0050) (33,0.0042) (34,0.0038)
-  (35,0.0040) (36,0.0042) (37,0.0048) (38,0.0052) (39,0.0045)
-  (40,0.0038) (41,0.0032) (42,0.0025) (43,0.0020) (44,0.0018)
-  (45,0.0022) (46,0.0021) (47,0.0020) (48,0.0019) (49,0.0019)
-  (50,0.0019) (51,0.0017) (52,0.0014) (53,0.0011) (54,0.0010)
-  (55,0.0010) (56,0.00095) (57,0.00090) (58,0.00088) (59,0.00085)
-  (60,0.00080) (61,0.00075) (62,0.00070) (63,0.00068) (64,0.00070)
-  (65,0.00072) (66,0.00070) (67,0.00068) (68,0.00067) (69,0.00067)
-  (70,0.00068) (71,0.00070) (72,0.00068) (73,0.00067) (74,0.00066)
-  (75,0.00066) (76,0.00065) (77,0.00065) (78,0.00065) (79,0.00066)
-  (80,0.00072) (81,0.00068) (82,0.00064) (83,0.00063) (84,0.00062)
-  (85,0.00062) (86,0.00062) (87,0.00061) (88,0.00061) (89,0.00061)
-  (90,0.00061) (91,0.00060) (92,0.00060) (93,0.00060) (94,0.00060)
-  (95,0.00059) (96,0.00059) (97,0.00059) (98,0.00059) (99,0.00058)
-  (100,0.00058) (125,0.000555) (150,0.000535) (200,0.000515)
-  (250,0.000505) (300,0.000500) (350,0.000497) (400,0.000493)
-  (450,0.000488) (500,0.000482)
-};
-\addplot[only marks, mark=*, mark size=2.5pt, accent] coordinates {(0,1.44)};
-\addplot[only marks, mark=o, mark size=2.5pt, accent!70] coordinates {(100,0.00058)};
-\addplot[only marks, mark=square*, mark size=2.5pt, black!70] coordinates {(500,0.000482)};
-\node[font=\scriptsize, anchor=west] at (axis cs:4,1.44) {Init: $1.44$};
-\node[font=\scriptsize, anchor=south west] at (axis cs:102,0.00060) {Step 100: $5.8\!\times\!10^{-4}$};
-\node[font=\scriptsize, anchor=south west, text=black!70] at (axis cs:355,0.000530) {Final: $4.82\!\times\!10^{-4}$};
+\addplot[accent, thick] table[x=step, y=loss, col sep=space]
+  {manuscript_data/loss_curve_d5_seed0.dat};
+\addplot[only marks, mark=*, mark size=2.5pt, accent] coordinates {(0,1.361)};
+\addplot[only marks, mark=o, mark size=2.5pt, accent!70] coordinates {(100,5.75e-4)};
+\addplot[only marks, mark=square*, mark size=2.5pt, black!70] coordinates {(500,9.64e-5)};
+\node[font=\scriptsize, anchor=west] at (axis cs:4,1.36) {Init: $1.36$};
+\node[font=\scriptsize, anchor=south west] at (axis cs:102,6.5e-4) {Step 100: $5.7\times10^{-4}$};
+\node[font=\scriptsize, anchor=south west, text=black!70] at (axis cs:355,1.3e-4) {Final: $9.6\times10^{-5}$};
 \end{semilogyaxis}
 \end{tikzpicture}
-\caption{Training loss (log scale) over 500 Adam optimization steps. Most convergence occurs in the first 100 steps; the final three orders-of-magnitude reduction from random initialization demonstrates that gradient descent effectively navigates the QSP loss landscape at degree~5.}
+\caption{Training loss (log scale) over 500 Adam steps (seed~0, degree~5). Curve data from \texttt{manuscript\_data/loss\_curve\_d5\_seed0.dat}.}
 \label{fig:loss}
 \end{figure}
 
-\subsection{Polynomial Fidelity}
+\subsection{Multi-Seed Reliability}
 
-The learned circuit reproduces $P_{\mathrm{target}}$ with high fidelity across $[-0.95,0.95]$. The residual error is uniformly distributed with no systematic bias, consistent with convergence near a global minimum. The maximum pointwise deviation of $9.83\times10^{-2}$ is small relative to the target amplitude range. Crucially, the QSP circuit is trained to match the \emph{Chebyshev approximation} of $\sin(x)$, not $\sin(x)$ directly --- the gap between $P_{\mathrm{target}}$ and $\sin(x)$ is a degree-5 truncation artifact, independent of the learning procedure.
+We repeated training for 30 independent seeds at degree~5. Train MSE exhibits a long tail: median $6.3\times10^{-5}$, mean $1.6\times10^{-4}$, standard deviation $1.8\times10^{-4}$ (hold-out median $1.5\times10^{-3}$). All seeds converged below the protocol success threshold ($10^{-3}$).
 
 \begin{figure}[ht]
 \centering
 \begin{tikzpicture}
-\begin{axis}[
-  width=0.72\textwidth, height=6.2cm,
-  xlabel={Signal $x$},
-  ylabel={$P(x)$},
-  xmin=-1.05, xmax=1.05,
-  ymin=-1.15, ymax=1.15,
-  xtick={-1,-0.5,0,0.5,1},
-  ytick={-1,-0.5,0,0.5,1},
+\begin{semilogyaxis}[
+  width=0.55\textwidth, height=4.8cm,
+  ylabel={Train MSE},
+  xtick={0,1,2},
+  xticklabels={},
+  xmin=-0.5, xmax=2.5,
+  ymin=3e-5, ymax=8e-4,
   grid=both,
   grid style={line width=0.3pt, draw=lightrule},
-  axis lines=center,
-  axis line style={-Stealth, thin, graytext},
-  xlabel style={font=\small, at={(axis cs:1.08,0)}, anchor=west},
-  ylabel style={font=\small, at={(axis cs:0,1.18)}, anchor=south},
+  axis line style={accent},
   tick label style={font=\small, color=graytext},
-  legend style={font=\small, at={(0.97,0.05)}, anchor=south east,
-                draw=lightrule, fill=white, row sep=1pt},
-  legend cell align=left,
+  ylabel style={font=\small},
 ]
-\addplot[gray, dashed, semithick, domain=-0.95:0.95, samples=80]
-  {sin(deg(x))};
-\addlegendentry{$\sin(x)$ (reference)}
-
-\addplot[black, thick, domain=-0.95:0.95, samples=80]
-  {1.5257*x - 0.9416*x^3 + 0.2528*x^5};
-\addlegendentry{$P_{\mathrm{target}}(x)$ (Chebyshev, deg.\ 5)}
-
-\addplot[accent, thick, densely dashed, domain=-0.95:0.95, samples=80]
-  {1.5257*x - 0.9416*x^3 + 0.2528*x^5 + 0.04*sin(deg(5*x))*x*(1-x*x)};
-\addlegendentry{Trained QSP output $\langle X\rangle_{\boldsymbol{\phi}^*}$}
-\end{axis}
+\addplot[accent, only marks, mark=*, mark size=1.8pt, opacity=0.75]
+  table[x=index, y=train_mse, col sep=space]
+  {manuscript_data/multiseed_d5_train_mse.dat};
+\addplot[accent, dashed, thick] coordinates {(-0.4,6.3e-5) (2.4,6.3e-5)};
+\node[font=\scriptsize, anchor=south] at (axis cs:1,3.5e-5) {30 seeds, $d=5$};
+\node[font=\scriptsize, anchor=west, accent] at (axis cs:2.05,8e-5) {median $6.3\times10^{-5}$};
+\end{semilogyaxis}
 \end{tikzpicture}
-\caption{Polynomial approximation quality. The trained QSP circuit (blue, dashed) closely tracks the degree-5 Chebyshev target $P_{\mathrm{target}}$ (black). The residual gap between $P_{\mathrm{target}}$ and the true $\sin(x)$ (grey, dashed) reflects the inherent degree-5 truncation error, not a limitation of the gradient learning procedure.}
+\caption{Per-seed train MSE at degree~5 ($n=30$). Dashed line: median.}
+\label{fig:multiseed}
+\end{figure}
+
+\subsection{Baseline Comparison}
+
+Table~\ref{tab:baseline} compares gradient Adam to analytic solvers on the \emph{same flat training circuit}. Mapped train MSE applies the convention bridge $\phi_{\mathrm{flat}}=\pi/2-\phi_{\mathrm{chao}}$ (Section~\ref{sec:limitations}); raw solver angles without mapping yield much higher MSE (footnote).
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{@{} l r r r @{}}
+  \toprule
+  \textbf{Method} & \textbf{Train MSE (mapped)} & \textbf{Hold-out MSE} & \textbf{Wall-clock (s)} \\
+  \midrule
+  Gradient Adam (seed 0) & $9.6\times10^{-5}$ & $1.66\times10^{-3}$ & 1.45 \\
+  PennyLane \texttt{poly\_to\_angles} & $4.7\times10^{-3}$ & $9.0\times10^{-3}$ & 1.94 \\
+  Chao / \texttt{pyqsp} (Laurent) & $4.7\times10^{-3}$ & $9.0\times10^{-3}$ & 0.007 \\
+  \bottomrule
+\end{tabular}
+\caption{Baseline comparison at degree~5, seed~0. Mapped analytic rows use the shared Chebyshev$\to$pyqsp$\to$flat convention. Without mapping, raw PennyLane and Chao train MSE are $0.59$ and $0.95$ respectively; Chao native reconstruction error is $1.3\times10^{-4}$.}
+\label{tab:baseline}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}
+\begin{semilogyaxis}[
+  width=0.62\textwidth, height=5cm,
+  ylabel={Train MSE (mapped)},
+  symbolic x coords={Gradient,PennyLane,Chao},
+  xtick=data,
+  x tick label style={font=\small, rotate=0, anchor=north},
+  ymin=5e-5, ymax=2e-2,
+  grid=both,
+  grid style={line width=0.3pt, draw=lightrule},
+  axis line style={accent},
+  tick label style={font=\small, color=graytext},
+  ylabel style={font=\small},
+  ybar,
+  bar width=18pt,
+  enlarge x limits=0.25,
+]
+\addplot[fill=accent!75, draw=accent] coordinates {
+  (Gradient,9.6e-5) (PennyLane,4.7e-3) (Chao,4.7e-3)
+};
+\end{semilogyaxis}
+\end{tikzpicture}
+\caption{Mapped train MSE for gradient vs.\ analytic baselines (degree~5, seed~0).}
+\label{fig:baseline}
+\end{figure}
+
+\subsection{Degree Scaling}
+
+Figure~\ref{fig:scaling} summarizes seed~0 training at odd degrees $\{5,7,9,15,21\}$. Gradient training remains below $10^{-3}$ train MSE through $d=21$ in this protocol; mapped analytic MSE is higher ($\sim10^{-2}$--$10^{-1}$ at moderate $d$), consistent with capitalization and convention residuals (Section~\ref{sec:limitations}).
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}
+\begin{semilogyaxis}[
+  width=0.72\textwidth, height=5.5cm,
+  xlabel={Polynomial degree $d$},
+  ylabel={Train MSE (mapped)},
+  xtick={5,7,9,15,21},
+  grid=both,
+  grid style={line width=0.3pt, draw=lightrule},
+  axis line style={accent},
+  tick label style={font=\small, color=graytext},
+  xlabel style={font=\small},
+  ylabel style={font=\small},
+  legend style={font=\small, at={(0.02,0.02)}, anchor=south west,
+                draw=lightrule, fill=white},
+]
+\addplot[accent, thick, mark=*, mark size=2pt]
+  table[x=degree, y=learned, col sep=space] {manuscript_data/scaling_table.dat};
+\addlegendentry{Gradient Adam}
+\addplot[black!70, thick, dashed, mark=square*, mark size=2pt]
+  table[x=degree, y=analytic_mapped, col sep=space] {manuscript_data/scaling_table.dat};
+\addlegendentry{Analytic (mapped)}
+\end{semilogyaxis}
+\end{tikzpicture}
+\caption{Degree scaling (seed~0): learned vs.\ mapped analytic train MSE.}
+\label{fig:scaling}
+\end{figure}
+
+\subsection{Polynomial Fidelity}
+
+Figure~\ref{fig:poly} shows the Chebyshev target, the trained circuit output $\langle X\rangle_{\boldsymbol{\phi}^*}(x)$ evaluated on a dense grid (not a synthetic perturbation), and the pointwise residual. The learned curve tracks $P_{\mathrm{target}}$ closely; visible structure in the residual panel reflects optimization on a discrete training grid and hold-out effects, not degree-5 truncation of $\sin(x)$.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={
+    group size=1 by 2,
+    vertical sep=0.38cm,
+    xticklabels at=edge bottom,
+  },
+  width=0.72\textwidth,
+  height=5.2cm,
+  xmin=-1.02, xmax=1.02,
+  xtick={-1,-0.5,0,0.5,1},
+  grid=both,
+  grid style={line width=0.3pt, draw=lightrule},
+  axis line style={-Stealth, thin, graytext},
+  tick label style={font=\small, color=graytext},
+  xlabel style={font=\small},
+  ylabel style={font=\small},
+]
+\nextgroupplot[
+  ylabel={$P(x)$},
+  ymin=-1.05, ymax=1.05,
+]
+\addplot[gray, dashed, thick]
+  table[x=x, y=target, col sep=space] {manuscript_data/poly_fidelity_d5_seed0.dat};
+\addlegendentry{$P_{\mathrm{target}}$ (Chebyshev)}
+\addplot[accent, thick, densely dashed]
+  table[x=x, y=learned, col sep=space] {manuscript_data/poly_fidelity_d5_seed0.dat};
+\addlegendentry{Trained $\langle X\rangle$}
+\legend{at={(0.97,0.95)}, anchor=north east, font=\scriptsize,
+         draw=lightrule, fill=white}
+\nextgroupplot[
+  xlabel={Signal $x$},
+  ylabel={Residual},
+  ymin=-0.06, ymax=0.06,
+]
+\addplot[accent!70, thick]
+  table[x=x, y=residual, col sep=space] {manuscript_data/poly_fidelity_d5_seed0.dat};
+\addplot[gray!50, thin] coordinates {(-1,0) (1,0)};
+\end{groupplot}
+\end{tikzpicture}
+\caption{Polynomial fidelity (seed~0). \textbf{Top:} target vs.\ circuit output from exported phases. \textbf{Bottom:} pointwise residual on a dense grid.}
 \label{fig:poly}
 \end{figure}
 
@@ -607,20 +704,20 @@ The learned circuit reproduces $P_{\mathrm{target}}$ with high fidelity across $
   \toprule
   \textbf{Scenario} & \textbf{Recommended approach} \\
   \midrule
-  Known target polynomial, degree $<10^3$       & Analytic solver \\
-  Implicit loss (e.g.\ energy minimization)      & Gradient training \\
-  QSP as subroutine in a larger VQA              & End-to-end gradient training \\
-  Degree $>10^3$                                 & Iterative analytic solver~\cite{chao2020finding} \\
-  Novel polynomial with no closed form           & Gradient training \\
+  Known target, flat-circuit training metric (this work) & Gradient training \\
+  Fast classical angles; native solver convention & Chao / \texttt{pyqsp} or PennyLane \\
+  Implicit loss (e.g.\ energy in a VQA) & End-to-end gradient training \\
+  Very high degree, closed-form target & Iterative analytic solver~\cite{chao2020finding} \\
+  Novel polynomial, no closed form & Gradient training \\
   \bottomrule
 \end{tabularx}
-\caption{Decision guide: when to use analytic angle computation vs.\ gradient-based learning.}
+\caption{Decision guide updated from measured baselines (Section~4). Analytic solvers excel in speed and native accuracy; gradient training wins on the flat-circuit MSE used for learning.}
 \label{tab:decision}
 \end{table}
 
 \subsection{Loss Landscape and Scaling}
 
-The QSP loss landscape is non-convex. At degree~5, a single random seed with small initialization ($|\phi_i|\le0.5$) was sufficient for convergence. Higher degrees ($d\gg10$) are expected to produce a more complex landscape with more local minima, potentially requiring curriculum learning over degree, better initialization, or second-order methods.
+The QSP loss landscape is non-convex. At degree~5, 30/30 seeds converged below $10^{-3}$ train MSE with uniform initialization in $[-0.5,0.5]$. At $d=15$, hold-out error grows ($\sim2.3\times10^{-2}$) while train MSE remains below $10^{-3}$, indicating grid-limited generalization rather than optimization failure. Higher degrees may require curriculum warm-starts or second-order methods; we leave systematic study to future work.
 
 \subsection{The JAX Traceability Constraint}
 
@@ -628,22 +725,25 @@ The flat-circuit pattern described in Section~3.3 is the correct workaround for 
 
 \subsection{Reproducibility}
 
-The full implementation is publicly available under Apache~2.0 at \url{https://github.com/rosspeili/trainable-qsp-angles}~\cite{peili_trainable_qsp_2026}. An interactive Jupyter notebook (\texttt{demo.ipynb}) is included in the repository.
+The implementation, experiment scripts, audit trail (\texttt{docs/AUDIT\_TRAIL.md}), and figure data are available at \url{https://github.com/rosspeili/trainable-qsp-angles}~\cite{peili_trainable_qsp_2026} (DOI: \href{https://doi.org/10.5281/zenodo.20645403}{10.5281/zenodo.20645403}). Regenerate tables and plots with \texttt{py -3.13 -m experiments.sweep all}, \texttt{py -3.13 -m experiments.summarize baseline}, and \texttt{py -3.13 -m experiments.export\_manuscript\_figures}.
+
+\subsection{Limitations}
+\label{sec:limitations}
+
+\begin{itemize}\setlength\itemsep{2pt}
+  \item \textbf{Convention mapping.} Analytic baselines require $\phi_{\mathrm{flat}}=\pi/2-\phi_{\mathrm{chao}}$ for fair comparison on our flat circuit; mapped analytic MSE remains above gradient MSE ($\sim10^{-3}$ at $d=5$, higher at some degrees).
+  \item \textbf{Single target family.} Results apply to one Chebyshev $\sin$ benchmark (T1); other polynomials may behave differently.
+  \item \textbf{Simulation only.} No shot noise, hardware, or transpilation effects.
+  \item \textbf{Scaling statistics.} Degree scaling uses one seed per degree; multi-seed stats are reported at $d=5$ only.
+  \item \textbf{Reference stack.} One PennyLane+JAX implementation; the flat-circuit recipe is portable but not cross-validated on hardware here.
+\end{itemize}
+
+\section{Outlook}
+
+Gradient-learned QSP phases are most compelling when the training objective \emph{is} the flat differentiable circuit---for example, QSP blocks inside variational pipelines with implicit targets. Immediate extensions include curriculum training across degree, tighter convention alignment for analytic baselines, and optional cross-SDK validation. The combination of interpretable polynomial structure and automatic differentiation remains a practical template for quantum subroutine design.
 
 %% ============================================================
-\section{Food for Thought}
-%% ============================================================
-
-Quantum Signal Processing is, at its core, a statement about \emph{expressibility}: any bounded-parity polynomial can be realized by a structured single-qubit circuit. This is a completeness result --- not merely an existence proof, but a constructive recipe. What the gradient approach adds is a \emph{learning} recipe: given any differentiable objective, one can search the space of realizable polynomials by moving through the space of phase angles.
-
-\textbf{What is a quantum algorithm, really?} The grand unification perspective of~\cite{martyn2021grand} suggests that many quantum algorithms are the same circuit architecture differentiated only by their phase angle sequence. If phase angles can be \emph{learned} rather than derived, the boundary between algorithm design and machine learning in the quantum domain becomes blurry. Are we designing algorithms, or training them?
-
-This is not merely philosophical. In the classical world, the success of deep learning has demonstrated that learned programs can solve problems for which no analytic solution is known, often by discovering structure the algorithm designer did not anticipate. QSP provides a quantum analogue: a parameterized circuit with a clear mathematical interpretation of what its parameters control. Unlike generic variational circuits (expressive but opaque), QSP circuits are \emph{interpretable} --- each phase sequence corresponds to a specific polynomial with a direct operational meaning.
-
-The gradient-trained QSP circuit is therefore a peculiar object: simultaneously a machine-learned artifact (its parameters were found by optimization) and a provably structured quantum program (its output is a bounded polynomial in the signal). This combination --- optimization within a mathematically transparent space --- may be a productive template for the broader challenge of quantum algorithm discovery.
-
-One further provocation: the NISQ era~\cite{preskill2018quantum} has been characterized by variational algorithms that optimize generic parameterized circuits for heuristic objectives. QSP offers an alternative: variational circuits that are not generic, but \emph{complete within a well-defined polynomial class}. The question is whether that polynomial class is expressive enough for practically relevant tasks beyond quantum simulation. We believe the answer is likely yes --- and that gradient-based QSP learning is one of the more principled paths toward finding out.
-
+%% (Former extended speculative section condensed into Outlook above.)
 %% ============================================================
 
 

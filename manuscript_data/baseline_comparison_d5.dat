@@ -1,0 +1,4 @@
+method train_mse train_mse_unmapped wall_clock_s
+Gradient Adam 9.615769004875e-05  1.449586
+PennyLane analytic 4.726046423132e-03 0.58916578421415 1.935074
+Chao / pyqsp 4.726046423132e-03 0.9513299830244029 0.007365

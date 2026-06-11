@@ -206,7 +206,11 @@ Each hypothesis gets a pre-registered config file before running sweeps.
 - [x] Notebooks: `notebooks/01_baseline_comparison.ipynb`, `02_scaling_study.ipynb`
 - [x] Paper curve export: `results/paper/loss_curve_d5_seed0.json`
 - [x] Convention mapping: `qsp_jax/convention.py`, `docs/CONVENTIONS.md`
-- [ ] Regenerate manuscript pgfplots from exported JSON (Phase 3)
+- [x] Regenerate manuscript figures from exported JSON/CSV (`experiments/export_manuscript_figures.py`, `manuscript_data/`)
+- [x] Results section: baselines, 30-seed stats, scaling (manuscript draft updated)
+- [x] Limitations + short Outlook (replaces Food for Thought)
+- [x] Zenodo DOI: 10.5281/zenodo.20645403
+- [ ] Final author proofread / title polish
 
 ### Phase 3 — Paper upgrade (2–3 weeks)
 

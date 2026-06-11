@@ -72,6 +72,9 @@ py -3.13 -m experiments.sweep ablation
 # Comparison table + loss curve for paper/notebooks
 py -3.13 -m experiments.summarize baseline
 
+# Export pgfplots data for manuscript.tex
+py -3.13 -m experiments.export_manuscript_figures
+
 # Append an audit entry after a failed run or significant fix
 py -3.13 -m experiments.audit append --category failure --status open \
   --title "..." --what "..." --why "..." --labels "tag1,tag2"
