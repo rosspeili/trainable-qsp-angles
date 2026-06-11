@@ -47,7 +47,7 @@ py -3.13 -m pytest tests/ -v
 py -3.13 -m jupyter notebook demo.ipynb
 ```
 
-Figures referenced in the README are generated when you run `demo.ipynb` (`target_polynomial.png`, `training_results.png`).
+Regenerate figures with `demo.ipynb`, or use the committed assets below.
 
 ### Reproducible experiments
 
@@ -72,6 +72,8 @@ trainable-qsp-angles/
 │   └── baseline_analytic.py
 ├── results/                # Generated run outputs (gitignored except .gitkeep)
 ├── demo.ipynb              # Interactive training demo
+├── target_polynomial.png   # Benchmark figure (also in demo.ipynb)
+├── training_results.png
 ├── qsp_jax/
 │   ├── __init__.py
 │   └── circuit.py          # Flat QSP circuit, target poly, loss
@@ -96,10 +98,18 @@ trainable-qsp-angles/
 
 ## Target Polynomial (Default Benchmark)
 
-Degree-5 odd Chebyshev approximation of `sin(x)` on `[-1, 1]`. After 500 Adam steps (lr=0.05, 64-point grid), typical results:
+The default target is a **degree-5 Chebyshev approximation of `sin(x)`** on `[-1, 1]` — an odd polynomial bounded in `[-1, 1]`, consistent with QSP conventions for odd-degree transformations. It has a maximum deviation of ~0.174 from the true `sin(x)`.
+
+![Target polynomial vs. sin(x)](target_polynomial.png)
+
+After 500 Adam steps (lr=0.05, 64-point grid), typical results:
 
 - **Final MSE**: ~4.82×10⁻⁴
 - **Max pointwise error**: ~9.83×10⁻² (vs. target polynomial, not vs. `sin(x)` directly)
+
+Loss drops from ~1.44 (random initialization) to ~6.4×10⁻⁴, converging quickly within the first 100 steps.
+
+![Training loss and learned polynomial](training_results.png)
 
 ---
 
