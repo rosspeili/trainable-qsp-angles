@@ -18,14 +18,6 @@ This repository is the canonical home for the paper, reproducible experiments, n
 
 ---
 
-## Author
-
-**Vladimiros Peilivanidis**  
-ARPA Hellenic Logical Systems, Thessaloniki, Greece  
-[r1@arpacorp.net](mailto:r1@arpacorp.net) · [ORCID 0009-0003-0121-465X](https://orcid.org/0009-0003-0121-465X)
-
----
-
 ## What This Is
 
 Quantum Signal Processing encodes polynomial transformations of a scalar signal into a single-qubit circuit via phase-shifted oracle calls. The classical approach computes phase angles analytically from a target polynomial. This project explores the complementary route: **train phase angles from random initialization** using automatic differentiation and gradient-based optimization.
@@ -194,30 +186,15 @@ See [NOTICE](NOTICE) for the full attribution text and suggested citation.
 
 ## Related Work
 
-This project sits at the intersection of **quantum signal processing (QSP)**, **analytic phase solvers**, and **differentiable quantum programming**. The seven references below are the most directly relevant; the full bibliography for the manuscript is in [`references.bib`](references.bib).
+Key references (full bibliography: [`references.bib`](references.bib)):
 
-1. **Low & Chuang (2017)** — [Optimal Hamiltonian Simulation by Quantum Signal Processing](https://arxiv.org/abs/1606.02685) · *Phys. Rev. Lett.*  
-   Foundational QSP framework: phase angles encode polynomial transforms of a signal oracle.
-
-2. **Gilyén et al. (2019)** — [Quantum singular value transformation and beyond](https://arxiv.org/abs/1806.01838) · STOC  
-   QSVT generalizes QSP to block-encoded operators; underpins most modern quantum algorithm design.
-
-3. **Martyn et al. (2021)** — [A Grand Unification of Quantum Algorithms](https://arxiv.org/abs/2105.02859) · *PRX Quantum*  
-   Unified view of Hamiltonian simulation, amplitude amplification, and related primitives as QSP/QSVT instances.
-
-4. **Chao et al. (2020)** — [Finding Angles for QSP with Machine Precision](https://arxiv.org/abs/2003.02831)  
-   State-of-the-art analytic solver (`pyqsp`); primary baseline in our comparison table (mapped to the flat training circuit).
-
-5. **Haah (2019)** — [Product Decomposition of Periodic Functions in Quantum Signal Processing](https://arxiv.org/abs/1806.10236) · *Quantum*  
-   Theoretical structure of QSP angle finding; relevant context for solver stability at higher degree.
-
-6. **Cerezo et al. (2021)** — [Variational Quantum Algorithms](https://arxiv.org/abs/2012.09265) · *Nature Reviews Physics*  
-   Gradient-based optimization of parameterized quantum circuits — the broader setting in which learned QSP phases are natural.
-
-7. **Bergholm et al. (2022)** — [PennyLane: automatic differentiation of hybrid quantum-classical computations](https://arxiv.org/abs/1811.04968)  
-   Reference stack used here for the flat QSP circuit and `poly_to_angles` baseline (see `qsp_jax/`).
-
-Additional citations (JAX, Optax, Qiskit, Cirq, application papers, and this work’s Zenodo record) are listed in [`references.bib`](references.bib).
+- Low & Chuang (2017), [Optimal Hamiltonian Simulation by QSP](https://arxiv.org/abs/1606.02685), *Phys. Rev. Lett.*
+- Gilyén et al. (2019), [Quantum singular value transformation and beyond](https://arxiv.org/abs/1806.01838), STOC
+- Martyn et al. (2021), [A Grand Unification of Quantum Algorithms](https://arxiv.org/abs/2105.02859), *PRX Quantum*
+- Chao et al. (2020), [Finding Angles for QSP with Machine Precision](https://arxiv.org/abs/2003.02831)
+- Haah (2019), [Product Decomposition of Periodic Functions in QSP](https://arxiv.org/abs/1806.10236), *Quantum*
+- Cerezo et al. (2021), [Variational Quantum Algorithms](https://arxiv.org/abs/2012.09265), *Nat. Rev. Phys.*
+- Bergholm et al. (2022), [PennyLane](https://arxiv.org/abs/1811.04968)
 
 ---
 
