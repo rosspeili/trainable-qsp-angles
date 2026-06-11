@@ -209,7 +209,7 @@ The practical challenge is computing those phase angles. Given a target polynomi
 
 We explore a complementary approach: \emph{learning} phase angles from random initialization using gradient descent. The key observation is that a QSP circuit, when implemented correctly as a differentiable quantum program, admits automatic differentiation through all its parameters. This makes it possible to minimize any differentiable loss over the phase angles using standard optimizers.
 
-We demonstrate this via a publicly available implementation~\cite{peili_demo_2026} built on PennyLane~\cite{pennylane2022} and JAX~\cite{jax2018github}. Along the way, we identify and resolve a non-obvious incompatibility between PennyLane's built-in QSVT primitive and JAX's tracing mechanism, and provide the correct flat-circuit implementation pattern.
+We demonstrate this via a publicly available implementation~\cite{peili_trainable_qsp_2026} built on PennyLane~\cite{pennylane2022} and JAX~\cite{jax2018github}. Along the way, we identify and resolve a non-obvious incompatibility between PennyLane's built-in QSVT primitive and JAX's tracing mechanism, and provide the correct flat-circuit implementation pattern.
 
 \begin{tcolorbox}[contribbox]
 \begin{itemize}\setlength\itemsep{3pt}
@@ -474,7 +474,7 @@ def qsp_qnode(phases, x):
   Precision           & float64            & Numerical stability of $\arccos$ near $\pm 1$ \\
   \bottomrule
 \end{tabularx}
-\caption{Technology stack. All components interoperate through JAX's functional transformation interface~\cite{peili_demo_2026}.}
+\caption{Technology stack. All components interoperate through JAX's functional transformation interface~\cite{peili_trainable_qsp_2026}.}
 \label{tab:stack}
 \end{table}
 

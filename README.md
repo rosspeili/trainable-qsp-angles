@@ -49,6 +49,15 @@ py -3.13 -m jupyter notebook demo.ipynb
 
 Figures referenced in the README are generated when you run `demo.ipynb` (`target_polynomial.png`, `training_results.png`).
 
+### Reproducible experiments
+
+```bash
+py -3.13 experiments/train.py --seed 0 --steps 500
+py -3.13 experiments/baseline_analytic.py
+```
+
+JSON outputs are written to `results/`.
+
 ---
 
 ## Repository Layout
@@ -58,6 +67,10 @@ trainable-qsp-angles/
 ├── manuscript.tex          # Paper source
 ├── references.bib          # Bibliography
 ├── RESEARCH_PLAN.md        # Analysis, gaps, and experimental roadmap
+├── experiments/
+│   ├── train.py            # CLI: gradient training → results/*.json
+│   └── baseline_analytic.py
+├── results/                # Generated run outputs (gitignored except .gitkeep)
 ├── demo.ipynb              # Interactive training demo
 ├── qsp_jax/
 │   ├── __init__.py

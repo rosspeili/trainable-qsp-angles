@@ -19,6 +19,10 @@ import jax
 import jax.numpy as jnp
 import pennylane as qp
 
+from qsp_jax.polynomial import target_poly
+
+__all__ = ["qsp_circuit", "target_poly", "loss_fn"]
+
 # float64 must be enabled before any JAX computation is traced.
 # Setting it here at import time ensures all QNodes and gradient
 # computations in this module use 64-bit precision.
@@ -86,41 +90,7 @@ def qsp_circuit(phases, x):
     return _qsp_qnode(phases, x)
 
 
-# ---------------------------------------------------------------------------
-# Target polynomial
-# ---------------------------------------------------------------------------
-
-
-def target_poly(x):
-    """
-    Target polynomial: degree-5 odd Chebyshev approximation of sin(x).
-
-    Uses T_1, T_3, T_5 (Chebyshev polynomials of the first kind):
-        T1(x) = x
-        T3(x) = 4x^3 - 3x
-        T5(x) = 16x^5 - 20x^3 + 5x
-
-    Coefficients fit sin(x) on [-1, 1] via Chebyshev expansion.
-
-    Parameters
-    ----------
-    x : float or array-like
-        Signal value(s) in [-1, 1].
-
-    Returns
-    -------
-    float or array-like
-        Polynomial value(s), bounded in [-1, 1].
-    """
-    c1 = 0.9775
-    c3 = -0.1564
-    c5 = 0.0158
-
-    T1 = x
-    T3 = 4.0 * x**3 - 3.0 * x
-    T5 = 16.0 * x**5 - 20.0 * x**3 + 5.0 * x
-
-    return c1 * T1 + c3 * T3 + c5 * T5
+# Re-exported from qsp_jax.polynomial for backward compatibility.
 
 
 # ---------------------------------------------------------------------------
