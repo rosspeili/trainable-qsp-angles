@@ -1,12 +1,14 @@
+<div align="center">
+
 # Learning QSP Phase Angles via Gradient Descent
+
+<img src="TRAINING_QSP_PHASE_ANGLES.png" alt="Training QSP Phase Angles via Gradient Descent" width="640">
 
 **A reproducible empirical study with JAX-traceable circuits**
 
 Research code and manuscript for learning Quantum Signal Processing (QSP) phase angles by gradient descent — a framework-agnostic method (flat differentiable circuit + JAX + Optax), with a **PennyLane reference implementation** in `qsp_jax/`.
 
 This repository is the canonical home for the paper, reproducible experiments, notebooks, and tests. It evolved from the earlier [PennyLane community demo](https://github.com/rosspeili/qsp-pennylane-demo) but is maintained here as a standalone research project.
-
-<div align="center">
 
 [![DOI](https://img.shields.io/badge/DOI-20645403-ddd6fe?style=flat-square)](https://doi.org/10.5281/zenodo.20645403)
 [![License](https://img.shields.io/badge/License-Apache_2.0-efcefa?style=flat-square)](LICENSE)
