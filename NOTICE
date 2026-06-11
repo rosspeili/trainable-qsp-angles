@@ -1,0 +1,26 @@
+Trainable QSP Angles
+Copyright 2026 Ross Peili (Vladimiros Peilivanidis)
+ARPA Hellenic Logical Systems, Thessaloniki, Greece
+
+This product includes software, documentation, and research materials developed
+by Ross Peili at ARPA Hellenic Logical Systems.
+
+Attribution requirement
+-----------------------
+If you use this work in its entirety or in part — including but not limited to
+source code, code snippets, notebooks, figures, data, or the accompanying
+LaTeX manuscript — you must clearly attribute:
+
+  Ross Peili (Vladimiros Peilivanidis)
+  ARPA Hellenic Logical Systems
+
+in any derivative work, publication, presentation, or redistribution, unless
+a separate written agreement with the copyright holder states otherwise.
+
+Suggested citation
+------------------
+Peilivanidis, V. (2026). Learning Phase Angles for Quantum Signal Processing
+via Gradient Descent. https://github.com/rosspeili/trainable-qsp-angles
+
+This notice is provided for attribution purposes and does not modify the
+Apache License, Version 2.0. See LICENSE for full terms.

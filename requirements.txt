@@ -1,0 +1,8 @@
+pennylane>=0.44
+jax>=0.4.25
+jaxlib>=0.4.25
+optax>=0.2.2
+matplotlib>=3.8
+numpy>=1.26
+jupyter>=1.0
+pytest>=8.0
