@@ -74,3 +74,6 @@ manuscript_data/meta.json
 
 # Compiled paper (upload PDF to Zenodo; keep .tex in git)
 manuscript.pdf
+
+# Internal roadmap (not published on GitHub)
+RESEARCH_PLAN.md

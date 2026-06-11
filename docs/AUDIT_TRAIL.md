@@ -4,7 +4,7 @@
 
 **Maintainers:** Append to `LOG.jsonl` after significant events (`py -3.13 -m experiments.audit append ...`). Update this document when a failure category or open issue changes status.
 
-**Related:** [`CHANGELOG.md`](../CHANGELOG.md) (version summaries) · [`RESEARCH_PLAN.md`](../RESEARCH_PLAN.md) (roadmap) · [`results/`](../results/) (raw run data, gitignored)
+**Related:** [`CHANGELOG.md`](../CHANGELOG.md) (version summaries) · [`results/`](../results/) (raw run data, gitignored)
 
 ---
 

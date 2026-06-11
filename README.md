@@ -8,12 +8,11 @@ This repository is the canonical home for the paper, reproducible experiments, n
 
 <div align="center">
 
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20645403-ddd6fe?style=flat-square)](https://doi.org/10.5281/zenodo.20645403)
-[![ORCID](https://img.shields.io/badge/ORCID-0009--0003--0121--465X-fce7f3?style=flat-square)](https://orcid.org/0009-0003-0121-465X)
+[![DOI](https://img.shields.io/badge/DOI-20645403-ddd6fe?style=flat-square)](https://doi.org/10.5281/zenodo.20645403)
 [![License](https://img.shields.io/badge/License-Apache_2.0-efcefa?style=flat-square)](LICENSE)
 ![Python](https://img.shields.io/badge/Python-3.13%2B-bae6fd?style=flat-square)
 ![JAX](https://img.shields.io/badge/JAX-0.4.25%2B-a5f3fc?style=flat-square)
-![PennyLane (ref.)](https://img.shields.io/badge/PennyLane-ref._impl.-e9d5ff?style=flat-square)
+![PennyLane](https://img.shields.io/badge/PennyLane-0.44%2B-e9d5ff?style=flat-square)
 
 </div>
 
@@ -35,7 +34,7 @@ Primary contributions (current state):
 
 - A **JAX-traceable flat QSP circuit** (avoiding high-level QSVT templates that capture concrete values and break gradients — documented first in our PennyLane reference code)
 - A **reproducible degree-5 benchmark** (Chebyshev approximation of `sin(x)`) with multi-seed, scaling, and analytic baselines (PennyLane + Chao/pyqsp)
-- The accompanying **manuscript** (`manuscript.tex`, self-contained via `manuscript_numbers.tex`) and **research roadmap** (`RESEARCH_PLAN.md`)
+- The accompanying **manuscript** (`manuscript.tex`, self-contained via `manuscript_numbers.tex`)
 
 See `docs/FRAMEWORKS.md` for when PennyLane is the right tool here vs. Qiskit, Cirq, TensorFlow Quantum, OpenFermion, or standalone analytic solvers.
 
@@ -118,7 +117,6 @@ trainable-qsp-angles/
 ├── manuscript.tex          # Paper source (self-contained figures)
 ├── manuscript_numbers.tex  # Hardcoded result coordinates (from results/)
 ├── references.bib          # Bibliography
-├── RESEARCH_PLAN.md        # Analysis, gaps, and experimental roadmap
 ├── experiments/
 │   ├── configs/default.json
 │   ├── train.py
