@@ -508,7 +508,7 @@ Phase angles are initialized uniformly in $[-0.5,0.5]$. A uniform grid of 64 sig
 \section{Results}
 %% ============================================================
 
-All numerical values in this section are hardcoded in \texttt{manuscript\_numbers.tex} (included at compile time). Provenance: \texttt{results/paper/}, \texttt{results/t1\_degree5/}, \texttt{results/scaling/}, and \texttt{results/ablation/} JSON/CSV logs generated on 2026-06-11 by \texttt{py -3.13 -m experiments.summarize baseline} and \texttt{py -3.13 -m experiments.sweep}. Regenerate figure coordinates with \texttt{py -3.13 -m experiments.generate\_manuscript\_numbers}.
+All numerical values in this section are hardcoded in \texttt{manuscript\_numbers.tex} (included at compile time). Provenance: \texttt{results/paper/}, \texttt{results/t1\_degree5/}, \texttt{results/t1\_degree7/}, \texttt{results/t1\_degree15/}, \texttt{results/scaling/}, and \texttt{results/ablation/} JSON/CSV logs. Regenerate figure coordinates with \texttt{py -3.13 -m experiments.generate\_manuscript\_numbers} after targeted sweeps (e.g.\ \texttt{sweep multi-seed --degrees 7,15}).
 
 \subsection{Convergence (Reference Seed)}
 
@@ -579,6 +579,77 @@ We repeated training for 30 independent seeds at degree~5. Train MSE exhibits a 
 \end{tikzpicture}
 \caption{Per-seed train MSE at degree~5 ($n=30$). Points from \texttt{results/t1\_degree5/train\_seed*.json}; dashed line: median.}
 \label{fig:multiseed}
+\end{figure}
+
+\subsection{Multi-Seed at Higher Degree}
+\label{sec:multiseed_higher}
+
+To assess reliability beyond the degree-5 headline benchmark, we repeated the default protocol ($500$ Adam steps, lr~$0.05$, uniform init in $[-0.5,0.5]$) for $n=\MultiSeedD7NSeeds$ independent seeds at $d=7$ and $d=15$. Table~\ref{tab:multiseed_higher} summarizes train and hold-out MSE; Figures~\ref{fig:multiseed_d7} and~\ref{fig:multiseed_d15} mirror the scatter format of Figure~\ref{fig:multiseed}. All seeds at both degrees converged below the protocol success threshold ($10^{-3}$ train MSE).
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{@{} r r r r r r @{}}
+  \toprule
+  \textbf{$d$} & \textbf{Train median} & \textbf{Train mean} & \textbf{Train stdev} & \textbf{Hold-out median} & \textbf{Success ($<10^{-3}$)} \\
+  \midrule
+  7  & $\MultiSeedD7TrainMedian$  & $\MultiSeedD7TrainMean$  & $\MultiSeedD7TrainStdev$  & $\MultiSeedD7HoldoutMedian$  & \MultiSeedD7NSuccess/\MultiSeedD7NSeeds \\
+  15 & $\MultiSeedD15TrainMedian$ & $\MultiSeedD15TrainMean$ & $\MultiSeedD15TrainStdev$ & $\MultiSeedD15HoldoutMedian$ & \MultiSeedD15NSuccess/\MultiSeedD15NSeeds \\
+  \bottomrule
+\end{tabular}
+\caption{Multi-seed statistics at $d=7$ and $d=15$ (T1, default protocol). Source: \texttt{results/t1\_degree7/summary.json}, \texttt{results/t1\_degree15/summary.json}.}
+\label{tab:multiseed_higher}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}
+\begin{semilogyaxis}[
+  width=0.72\textwidth, height=4.2cm,
+  ylabel={Train MSE},
+  xlabel={Seed index},
+  xmin=-1, xmax=30,
+  xtick={0,5,10,15,20,25,29},
+  ymin=\MultiSeedD7YMin, ymax=\MultiSeedD7YMax,
+  grid=both,
+  grid style={line width=0.3pt, draw=lightrule},
+  axis line style={accent},
+  tick label style={font=\small, color=graytext},
+  ylabel style={font=\small},
+  xlabel style={font=\small},
+]
+\addplot[accent, only marks, mark=*, mark size=1.8pt, opacity=0.85]
+  coordinates {\MultiSeedD7Coords};
+\addplot[accent, dashed, thick] coordinates {(-1,\MultiSeedD7TrainMedianNum) (30,\MultiSeedD7TrainMedianNum)};
+\end{semilogyaxis}
+\end{tikzpicture}
+\caption{Per-seed train MSE at degree~7 ($n=\MultiSeedD7NSeeds$). Dashed line: median $\MultiSeedD7TrainMedian$.}
+\label{fig:multiseed_d7}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}
+\begin{semilogyaxis}[
+  width=0.72\textwidth, height=4.2cm,
+  ylabel={Train MSE},
+  xlabel={Seed index},
+  xmin=-1, xmax=30,
+  xtick={0,5,10,15,20,25,29},
+  ymin=\MultiSeedD15YMin, ymax=\MultiSeedD15YMax,
+  grid=both,
+  grid style={line width=0.3pt, draw=lightrule},
+  axis line style={accent},
+  tick label style={font=\small, color=graytext},
+  ylabel style={font=\small},
+  xlabel style={font=\small},
+]
+\addplot[accent, only marks, mark=*, mark size=1.8pt, opacity=0.85]
+  coordinates {\MultiSeedD15Coords};
+\addplot[accent, dashed, thick] coordinates {(-1,\MultiSeedD15TrainMedianNum) (30,\MultiSeedD15TrainMedianNum)};
+\end{semilogyaxis}
+\end{tikzpicture}
+\caption{Per-seed train MSE at degree~15 ($n=\MultiSeedD15NSeeds$). Dashed line: median $\MultiSeedD15TrainMedian$.}
+\label{fig:multiseed_d15}
 \end{figure}
 
 \subsection{Hyperparameter Ablation}
@@ -759,7 +830,7 @@ This section interprets the benchmark results above. We do not claim a universal
 
 \subsection{Loss Landscape and Scaling}
 
-The QSP loss landscape is non-convex. At degree~5, 30/30 seeds converged below $10^{-3}$ train MSE with uniform initialization in $[-0.5,0.5]$. At $d=15$, hold-out error grows ($\sim2.3\times10^{-2}$) while train MSE remains below $10^{-3}$, indicating grid-limited generalization rather than optimization failure. Higher degrees may require curriculum warm-starts or second-order methods; we leave systematic study to future work.
+The QSP loss landscape is non-convex. At degree~5, 30/30 seeds converged below $10^{-3}$ train MSE with uniform initialization in $[-0.5,0.5]$; the same holds at $d=7$ and $d=15$ under the default protocol (Section~\ref{sec:multiseed_higher}). At $d=15$, seed~0 hold-out error in the scaling snapshot ($\sim2.3\times10^{-2}$) exceeds the multi-seed hold-out median ($\MultiSeedD15HoldoutMedian$), indicating seed-dependent generalization on the dense hold-out grid rather than systematic optimization failure.
 
 \subsection{The JAX Traceability Constraint}
 
@@ -776,7 +847,7 @@ The implementation, experiment scripts, audit trail (\texttt{docs/AUDIT\_TRAIL.m
   \item \textbf{Convention mapping.} Analytic baselines require $\phi_{\mathrm{flat}}=\pi/2-\phi_{\mathrm{chao}}$ for fair comparison on our flat circuit; mapped analytic MSE remains above gradient MSE ($\sim10^{-3}$ at $d=5$, higher at some degrees).
   \item \textbf{Single target family.} Results apply to one Chebyshev $\sin$ benchmark (T1); other polynomials may behave differently.
   \item \textbf{Simulation only.} No shot noise, hardware, or transpilation effects.
-  \item \textbf{Scaling statistics.} Degree scaling uses one seed per degree; multi-seed stats are reported at $d=5$ only.
+  \item \textbf{Scaling statistics.} Degree scaling curve (Figure~\ref{fig:scaling}) uses one seed per degree; multi-seed statistics are reported at $d=5$ (Figure~\ref{fig:multiseed}) and $d\in\{7,15\}$ (Section~\ref{sec:multiseed_higher}).
   \item \textbf{Ablation scope.} Hyperparameter ablation (Section~\ref{sec:ablation}) uses seed~0 only; multi-seed stats cover the default protocol at $d=5$.
   \item \textbf{Reference stack.} One PennyLane+JAX implementation; the flat-circuit recipe is portable but not cross-validated on hardware here.
 \end{itemize}

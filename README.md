@@ -63,6 +63,7 @@ py -3.13 -m experiments.baseline_analytic --backend chao --chao-method laurent
 
 # Phase 2 sweeps (use --quick for smoke tests)
 py -3.13 -m experiments.sweep multi-seed
+py -3.13 -m experiments.sweep multi-seed --degrees 7,15   # v1.1: higher-degree multi-seed only
 py -3.13 -m experiments.sweep scaling
 py -3.13 -m experiments.sweep ablation
 

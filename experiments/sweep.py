@@ -23,7 +23,13 @@ def _run_dir(base: Path, name: str) -> Path:
     return path
 
 
-def multi_seed_t1(degree: int, seeds: list[int], output_dir: Path, steps: int) -> dict[str, Any]:
+def multi_seed_t1(
+    degree: int,
+    seeds: list[int],
+    output_dir: Path,
+    steps: int,
+    success_threshold: float = 1e-3,
+) -> dict[str, Any]:
     """Train one seed at a time; return aggregate statistics."""
     run_dir = _run_dir(output_dir, f"t1_degree{degree}")
     runs: list[dict[str, Any]] = []
@@ -45,17 +51,21 @@ def multi_seed_t1(degree: int, seeds: list[int], output_dir: Path, steps: int) -
 
     train_mses = [r["metrics"]["train_mse"] for r in runs]
     holdout_mses = [r["metrics"]["holdout_mse"] for r in runs]
+    n_success = sum(1 for m in train_mses if m < success_threshold)
     summary = {
         "run_type": "sweep_summary",
         "timestamp_utc": utc_stamp(),
         "target_id": "T1",
         "degree": degree,
         "n_seeds": len(seeds),
+        "success_mse_threshold": success_threshold,
+        "n_success": n_success,
         "train_mse_mean": statistics.mean(train_mses),
         "train_mse_median": statistics.median(train_mses),
         "train_mse_stdev": statistics.pstdev(train_mses) if len(train_mses) > 1 else 0.0,
         "holdout_mse_mean": statistics.mean(holdout_mses),
         "holdout_mse_median": statistics.median(holdout_mses),
+        "holdout_mse_stdev": statistics.pstdev(holdout_mses) if len(holdout_mses) > 1 else 0.0,
         "run_files": [str(run_dir / f"train_seed{s}.json") for s in seeds],
     }
     write_json(run_dir / "summary.json", summary)
@@ -159,6 +169,11 @@ def ablation_study(output_dir: Path, protocol: dict[str, Any]) -> dict[str, Any]
     return summary
 
 
+def parse_degrees(value: str) -> list[int]:
+    """Parse comma-separated degree list (e.g. ``7,15``)."""
+    return [int(part.strip()) for part in value.split(",") if part.strip()]
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -168,6 +183,13 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--output-dir", type=Path, default=Path("results"))
     parser.add_argument("--config", type=Path, default=None)
+    parser.add_argument(
+        "--degrees",
+        type=str,
+        default=None,
+        help="Comma-separated degrees for multi-seed only (e.g. 7,15). "
+        "Default: protocol degree (5). Does not affect scaling/ablation.",
+    )
     parser.add_argument("--quick", action="store_true", help="Use 3 seeds / fewer degrees for smoke tests")
     return parser.parse_args()
 
@@ -178,9 +200,18 @@ def main() -> None:
     steps = protocol["steps"]
     seeds = protocol["seeds"][:3] if args.quick else protocol["seeds"]
     degrees = protocol["degrees"][:3] if args.quick else protocol["degrees"]
+    success_threshold = float(protocol.get("success_mse_threshold", 1e-3))
 
     if args.study in ("multi-seed", "all"):
-        multi_seed_t1(protocol["degree"], seeds, args.output_dir, steps)
+        ms_degrees = parse_degrees(args.degrees) if args.degrees else [int(protocol["degree"])]
+        for degree in ms_degrees:
+            multi_seed_t1(
+                degree,
+                seeds,
+                args.output_dir,
+                steps,
+                success_threshold=success_threshold,
+            )
     if args.study in ("scaling", "all"):
         scaling_study(degrees, seed=0, output_dir=args.output_dir, steps=steps)
     if args.study in ("ablation", "all"):

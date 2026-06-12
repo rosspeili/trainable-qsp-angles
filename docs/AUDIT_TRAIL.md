@@ -19,6 +19,7 @@
 | Phase 2 sweeps (30-seed) | ✅ Done | `results/t1_degree5/summary.json` (30 seeds) |
 | Paper CSV (3-row baseline) | ✅ Done | `results/paper/baseline_comparison_d5.csv` |
 | Manuscript v1.1 reframing | ✅ Done | Benchmark + implementation note scope (AUD-2026-06-12-023) |
+| Multi-seed d=7, d=15 | ✅ Done | `results/t1_degree7/`, `results/t1_degree15/` (30/30 success each) |
 
 ---
 
@@ -148,6 +149,15 @@ Source: `results/scaling/scaling_table.csv`
 | **Logo** | `arpa_logo.png` on title page (top-left); **local only**, gitignored, not on GitHub |
 | **Evidence** | `manuscript.tex`, `README.md`, `CHANGELOG.md` |
 
+### AUD-024 · fixed · `experiment` · Multi-seed at d=7 and d=15
+
+| | |
+|---|---|
+| **What** | 30-seed gradient training at $d=7$ and $d=15$ (default protocol); all seeds below $10^{-3}$ train MSE |
+| **How** | `py -3.13 -m experiments.sweep multi-seed --degrees 7,15` → new dirs only; legacy `t1_degree5/`, `scaling/`, `paper/` untouched |
+| **Paper** | §4.2.1 table + two scatter figures; `tests/test_manuscript_numbers.py` guards legacy macros |
+| **Evidence** | `results/t1_degree7/summary.json`, `results/t1_degree15/summary.json`, `manuscript_numbers.tex` |
+
 ---
 
 ## 3. Test audit
@@ -181,7 +191,7 @@ Source: `results/scaling/scaling_table.csv`
 | ID | Issue | Next action |
 |----|-------|-------------|
 | — | Analytic mapped MSE gap vs gradient at d≥7 | Document capitalization residual; optional sym_qsp baseline (v1.1 item 3) |
-| — | v1.1 paper items 2–5 | Multi-seed scaling d=7/15; off-grid test; barren plateaus discussion |
+| — | v1.1 paper items 3–5 | Chao sym_qsp baseline; off-grid test; barren plateaus discussion |
 
 ---
 
@@ -212,7 +222,7 @@ For failed experiment runs, always attach:
 
 ## 7. Chronological index (machine log)
 
-Full append-only log: [`audit/LOG.jsonl`](audit/LOG.jsonl) (18 entries as of 2026-06-12).
+Full append-only log: [`audit/LOG.jsonl`](audit/LOG.jsonl) (19 entries as of 2026-06-12).
 
 ```bash
 py -3.13 -m experiments.audit list --last 20
