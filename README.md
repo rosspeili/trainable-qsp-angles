@@ -27,12 +27,14 @@ Quantum Signal Processing encodes polynomial transformations of a scalar signal 
 Primary contributions (current state):
 
 - A **JAX-traceable flat QSP circuit** (avoiding high-level QSVT templates that capture concrete values and break gradients — documented first in our PennyLane reference code)
-- A **reproducible degree-5 benchmark** (Chebyshev approximation of `sin(x)`) with multi-seed, scaling, and analytic baselines (PennyLane + Chao/pyqsp)
+- A **reproducible degree-5 benchmark** (Chebyshev approximation of `sin(x)`) with multi-seed reliability, degree scaling, hyperparameter ablation, and mapped analytic baselines (PennyLane + Chao/pyqsp)
+- **v1.1 extensions:** multi-seed at $d=7$ and $d=15$; Chao `sym_qsp` audit; off-grid max-error probe; barren-plateau discussion in the manuscript
+- A **phase-convention protocol** for fair baseline comparison ([`docs/CONVENTIONS.md`](docs/CONVENTIONS.md))
 - The accompanying **manuscript** (`manuscript.tex`, self-contained via `manuscript_numbers.tex`)
 
-See `docs/FRAMEWORKS.md` for when PennyLane is the right tool here vs. Qiskit, Cirq, TensorFlow Quantum, OpenFermion, or standalone analytic solvers.
+See [`docs/FRAMEWORKS.md`](docs/FRAMEWORKS.md) for when PennyLane is the right tool here vs. Qiskit, Cirq, TensorFlow Quantum, OpenFermion, or standalone analytic solvers.
 
-**Audit trail:** failures, fixes, comparisons, and rationale are logged in [`docs/AUDIT_TRAIL.md`](docs/AUDIT_TRAIL.md) and [`docs/audit/LOG.jsonl`](docs/audit/LOG.jsonl). See [`CHANGELOG.md`](CHANGELOG.md) for version summaries.
+**Docs & audit:** [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md) · [`docs/FRAMEWORKS.md`](docs/FRAMEWORKS.md) · [`docs/AUDIT_TRAIL.md`](docs/AUDIT_TRAIL.md) · [`docs/audit/README.md`](docs/audit/README.md) · [`CHANGELOG.md`](CHANGELOG.md) · [`CITATION.cff`](CITATION.cff)
 
 ---
 
@@ -60,12 +62,12 @@ py -3.13 -m experiments.train --seed 0 --steps 500
 py -3.13 -m experiments.baseline_analytic
 py -3.13 -m experiments.baseline_analytic --backend pennylane
 py -3.13 -m experiments.baseline_analytic --backend chao --chao-method laurent
-py -3.13 -m experiments.compare_chao_methods   # Laurent vs sym_qsp audit (v1.1 item 3)
-py -3.13 -m experiments.offgrid_eval           # random off-grid max error (v1.1 item 4)
+py -3.13 -m experiments.compare_chao_methods   # Laurent vs sym_qsp native + mapped audit
+py -3.13 -m experiments.offgrid_eval           # random off-grid max error (1024 points)
 
 # Phase 2 sweeps (use --quick for smoke tests)
 py -3.13 -m experiments.sweep multi-seed
-py -3.13 -m experiments.sweep multi-seed --degrees 7,15   # v1.1: higher-degree multi-seed only
+py -3.13 -m experiments.sweep multi-seed --degrees 7,15   # higher-degree multi-seed only (additive paper macros)
 py -3.13 -m experiments.sweep scaling
 py -3.13 -m experiments.sweep ablation
 
@@ -73,6 +75,7 @@ py -3.13 -m experiments.sweep ablation
 py -3.13 -m experiments.summarize baseline
 
 # Regenerate hardcoded TeX figure numbers (manuscript_numbers.tex)
+# Legacy v1.0 figure macros are golden-tested; use targeted sweeps for additive blocks.
 py -3.13 -m experiments.generate_manuscript_numbers
 
 # Optional: legacy pgfplots .dat export (not required to compile manuscript.tex)
@@ -107,20 +110,26 @@ No external `.dat` files are required; figures use coordinates from `manuscript_
 trainable-qsp-angles/
 ├── docs/
 │   ├── AUDIT_TRAIL.md      # Failures, fixes, comparisons, rationale (human-readable)
-│   ├── audit/
-│   │   ├── LOG.jsonl       # Append-only machine audit log (committed)
-│   │   └── README.md       # How to append audit entries
-│   └── FRAMEWORKS.md       # Stack choices; PennyLane as ref. impl., not exclusive
+│   ├── CONVENTIONS.md      # pyqsp/PennyLane → flat-circuit phase mapping
+│   ├── FRAMEWORKS.md       # Stack choices; PennyLane as ref. impl., not exclusive
+│   └── audit/
+│       ├── LOG.jsonl       # Append-only machine audit log (committed)
+│       └── README.md       # How to append audit entries
 ├── manuscript.tex          # Paper source (self-contained figures)
 ├── manuscript_numbers.tex  # Hardcoded result coordinates (from results/)
 ├── references.bib          # Bibliography
+├── CITATION.cff              # Machine-readable citation metadata (Zenodo DOI)
+├── CHANGELOG.md
 ├── experiments/
 │   ├── configs/default.json
 │   ├── train.py
 │   ├── baseline_analytic.py
+│   ├── compare_chao_methods.py
+│   ├── offgrid_eval.py
 │   ├── sweep.py
 │   ├── summarize.py
-│   └── generate_manuscript_numbers.py
+│   ├── generate_manuscript_numbers.py
+│   └── audit.py
 ├── notebooks/
 │   ├── 01_baseline_comparison.ipynb
 │   └── 02_scaling_study.ipynb
@@ -165,7 +174,9 @@ After 500 Adam steps (lr=0.05, 64-point grid), Phase 2 reference results (seed 0
 - **Max pointwise error**: $3.42 \times 10^{-2}$ (vs. target polynomial)
 - **Mapped analytic baselines** (same flat circuit): $4.7 \times 10^{-3}$ train MSE
 
-Multi-seed ($n=30$): median train MSE $6.3 \times 10^{-5}$; all seeds below $10^{-3}$.
+Multi-seed ($n=30$): median train MSE $6.3 \times 10^{-5}$; all seeds below $10^{-3}$. At $d=7$ and $d=15$, 30/30 seeds also converge below $10^{-3}$ under the default protocol (see manuscript §4.3).
+
+**Off-grid probe** (1024 random $x$, seed 42): learned max error $2.9 \times 10^{-2}$ vs mapped analytic $1.8 \times 10^{-1}$ (`experiments/offgrid_eval.py`).
 
 **Hyperparameter ablation** (18 configs, seed 0; `results/ablation/`): learning rate $\in \{0.01, 0.05, 0.1\}$, grid $\in \{32, 64, 128\}$, init $\in \pm[0.5, 1.0]$ — all runs below $10^{-3}$ train MSE (range $3.7 \times 10^{-5}$–$1.8 \times 10^{-4}$). Default protocol is representative, not cherry-picked.
 
@@ -185,7 +196,7 @@ If you use this repository **in whole or in part** — code, snippets, notebooks
 
 See [NOTICE](NOTICE) for the full attribution text and suggested citation.
 
-**Cite:** [DOI 10.5281/zenodo.20645403](https://doi.org/10.5281/zenodo.20645403) (Zenodo) · [GitHub repository](https://github.com/rosspeili/trainable-qsp-angles)
+**Cite:** [DOI 10.5281/zenodo.20645403](https://doi.org/10.5281/zenodo.20645403) (Zenodo) · [GitHub repository](https://github.com/rosspeili/trainable-qsp-angles) · [`CITATION.cff`](CITATION.cff) for GitHub/Zenodo metadata
 
 ---
 
