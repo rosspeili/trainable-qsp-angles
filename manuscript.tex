@@ -674,7 +674,9 @@ We swept learning rate $\in\{0.01,0.05,0.1\}$, training grid size $\in\{32,64,12
 
 \subsection{Baseline Comparison}
 
-Table~\ref{tab:baseline} compares gradient Adam to analytic solvers on the \emph{same flat training circuit}. Mapped train MSE applies the convention bridge $\phi_{\mathrm{flat}}=\pi/2-\phi_{\mathrm{chao}}$ (Section~\ref{sec:limitations}); raw solver angles without mapping yield much higher MSE (footnote).
+Table~\ref{tab:baseline} compares gradient Adam to analytic solvers on the \emph{same flat training circuit}. Mapped train MSE applies the convention bridge $\phi_{\mathrm{flat}}=\pi/2-\phi_{\mathrm{chao}}$ (Section~\ref{sec:limitations}); raw solver angles without mapping yield much higher MSE (Table caption).
+
+We audited the Chao row against pyqsp's \texttt{sym\_qsp} solver (machine-precision native reconstruction, $\lesssim10^{-15}$ max error at $d=5$). After the same flat-circuit mapping, \texttt{sym\_qsp} mapped train MSE remains $\approx4.7\times10^{-3}$---indistinguishable from the default Laurent completion row. Headline baselines therefore report Laurent (faster); the mapped MSE gap vs.\ gradient is a \emph{convention/capitalization residual}, not solver inaccuracy (\texttt{results/paper/chao\_method\_comparison\_d5.json}).
 
 \begin{table}[ht]
 \centering\small
@@ -687,7 +689,7 @@ Table~\ref{tab:baseline} compares gradient Adam to analytic solvers on the \emph
   Chao / \texttt{pyqsp} (Laurent) & $4.7\times10^{-3}$ & $9.0\times10^{-3}$ & 0.007 \\
   \bottomrule
 \end{tabular}
-\caption{Baseline comparison at degree~5, seed~0. Mapped analytic rows use the shared Chebyshev$\to$pyqsp$\to$flat convention. Without mapping, raw PennyLane and Chao train MSE are $0.59$ and $0.95$ respectively; Chao native reconstruction error is $1.3\times10^{-4}$.}
+\caption{Baseline comparison at degree~5, seed~0. Mapped analytic rows use the shared Chebyshev$\to$pyqsp$\to$flat convention. Without mapping, raw PennyLane and Chao (Laurent) train MSE are $0.59$ and $0.95$ respectively. Chao Laurent native reconstruction error is $1.3\times10^{-4}$; \texttt{sym\_qsp} native error is $\lesssim10^{-15}$ with the same mapped train MSE ($\approx4.7\times10^{-3}$).}
 \label{tab:baseline}
 \end{table}
 
@@ -844,7 +846,7 @@ The implementation, experiment scripts, audit trail (\texttt{docs/AUDIT\_TRAIL.m
 \label{sec:limitations}
 
 \begin{itemize}\setlength\itemsep{2pt}
-  \item \textbf{Convention mapping.} Analytic baselines require $\phi_{\mathrm{flat}}=\pi/2-\phi_{\mathrm{chao}}$ for fair comparison on our flat circuit; mapped analytic MSE remains above gradient MSE ($\sim10^{-3}$ at $d=5$, higher at some degrees).
+  \item \textbf{Convention mapping.} Analytic baselines require $\phi_{\mathrm{flat}}=\pi/2-\phi_{\mathrm{chao}}$ for fair comparison on our flat circuit. Mapped analytic MSE remains above gradient MSE ($\sim10^{-3}$ at $d=5$, higher at some degrees) even when pyqsp \texttt{sym\_qsp} achieves machine-precision native reconstruction; the residual reflects capitalization and the incomplete bridge to $\mathrm{RZ}(-2\phi)$/$\langle X\rangle$, not failure of the Chao solver in its native convention.
   \item \textbf{Single target family.} Results apply to one Chebyshev $\sin$ benchmark (T1); other polynomials may behave differently.
   \item \textbf{Simulation only.} No shot noise, hardware, or transpilation effects.
   \item \textbf{Scaling statistics.} Degree scaling curve (Figure~\ref{fig:scaling}) uses one seed per degree; multi-seed statistics are reported at $d=5$ (Figure~\ref{fig:multiseed}) and $d\in\{7,15\}$ (Section~\ref{sec:multiseed_higher}).
@@ -854,7 +856,7 @@ The implementation, experiment scripts, audit trail (\texttt{docs/AUDIT\_TRAIL.m
 
 \section{Outlook}
 
-Within the scope of this benchmark, gradient-learned QSP phases are most compelling when the training objective \emph{is} the flat differentiable circuit---for example, QSP blocks inside variational pipelines with implicit targets. Immediate extensions include multi-seed scaling at higher degrees, off-grid generalization tests, tighter convention alignment for analytic baselines (sym\_qsp / machine precision where available), and optional cross-SDK validation. The combination of interpretable polynomial structure and automatic differentiation remains a practical template for quantum subroutine design when the loss is end-to-end differentiable.
+Within the scope of this benchmark, gradient-learned QSP phases are most compelling when the training objective \emph{is} the flat differentiable circuit---for example, QSP blocks inside variational pipelines with implicit targets. Immediate extensions include off-grid generalization tests and optional cross-SDK validation. The combination of interpretable polynomial structure and automatic differentiation remains a practical template for quantum subroutine design when the loss is end-to-end differentiable.
 
 %% ============================================================
 %% (Former extended speculative section condensed into Outlook above.)

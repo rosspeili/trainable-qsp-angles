@@ -31,6 +31,17 @@ Implemented in `qsp_jax/convention.py` as `chao_to_flat()`.
 Without mapping, flat-circuit MSE is ~0.95 (misleading). With mapping, ~5×10⁻³
 (capitalization / residual mapping error), not gradient-optimal ~10⁻⁴.
 
+### sym_qsp (machine-precision native solver)
+
+`method='sym_qsp'` with `chebyshev_basis=True` reaches near machine precision
+in pyqsp's native Wx/x convention (`pyqsp_reconstruction_max_error` ≲ 10⁻¹⁵ at
+d=5). After the same `chao_to_flat()` mapping, flat-circuit train MSE remains
+≈4.7×10⁻³—indistinguishable from Laurent. **Headline tables keep Laurent**
+(faster); sym_qsp is documented as a native-accuracy audit.
+
+Reproduce: `py -3.13 -m experiments.compare_chao_methods --degree 5`
+→ `results/paper/chao_method_comparison_d5.json`.
+
 ## PennyLane `poly_to_angles`
 
 PennyLane returns angles in its native QSP convention. A closed-form

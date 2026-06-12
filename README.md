@@ -60,6 +60,7 @@ py -3.13 -m experiments.train --seed 0 --steps 500
 py -3.13 -m experiments.baseline_analytic
 py -3.13 -m experiments.baseline_analytic --backend pennylane
 py -3.13 -m experiments.baseline_analytic --backend chao --chao-method laurent
+py -3.13 -m experiments.compare_chao_methods   # Laurent vs sym_qsp audit (v1.1 item 3)
 
 # Phase 2 sweeps (use --quick for smoke tests)
 py -3.13 -m experiments.sweep multi-seed

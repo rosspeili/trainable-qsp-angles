@@ -14,6 +14,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Entries refere
 - Phase 2 experiment results generated locally (AUD-020): 30-seed, scaling, ablation.
 
 ### Changed
+- **v1.1 item 3 (AUD-2026-06-12-025):** Chao sym_qsp audit — machine-precision native recon, same mapped flat MSE as Laurent; paper Limitations + CONVENTIONS updated; `experiments/compare_chao_methods.py`.
 - **v1.1 item 2 (AUD-2026-06-12-024):** Multi-seed sweeps at $d=7$ and $d=15$ (`sweep multi-seed --degrees 7,15`); additive `manuscript_numbers.tex` macros + paper §4.2.1; golden test locks legacy figure data.
 - **v1.1 item 1 (AUD-2026-06-12-023):** Manuscript reframed as reproducible benchmark + JAX implementation note (not a new QSP algorithm); subtitle, abstract, contributions C1–C4, Discussion scope, Outlook; README aligned. `arpa_logo.png` is paper-only (local, gitignored).
 - PennyLane mapped metrics use shared Chebyshev→pyqsp→flat bridge at all degrees (AUD-019).

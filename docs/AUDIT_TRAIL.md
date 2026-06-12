@@ -20,6 +20,7 @@
 | Paper CSV (3-row baseline) | ✅ Done | `results/paper/baseline_comparison_d5.csv` |
 | Manuscript v1.1 reframing | ✅ Done | Benchmark + implementation note scope (AUD-2026-06-12-023) |
 | Multi-seed d=7, d=15 | ✅ Done | `results/t1_degree7/`, `results/t1_degree15/` (30/30 success each) |
+| Chao sym_qsp audit (item 3) | ✅ Done | Native ≲10⁻¹⁵; mapped MSE unchanged vs Laurent |
 
 ---
 
@@ -158,6 +159,15 @@ Source: `results/scaling/scaling_table.csv`
 | **Paper** | §4.2.1 table + two scatter figures; `tests/test_manuscript_numbers.py` guards legacy macros |
 | **Evidence** | `results/t1_degree7/summary.json`, `results/t1_degree15/summary.json`, `manuscript_numbers.tex` |
 
+### AUD-025 · fixed · `chao` · sym_qsp vs Laurent audit (v1.1 item 3)
+
+| | |
+|---|---|
+| **Question** | Can sym_qsp / machine precision close the mapped analytic MSE gap vs gradient? |
+| **Result** | sym_qsp native recon ≲ 10⁻¹⁵ at d=5; mapped flat train MSE ≈ 4.73×10⁻³ (same as Laurent ≈ 4.73×10⁻³) |
+| **Conclusion** | Gap is convention/capitalization residual, not solver error; paper reports Laurent in main table |
+| **Evidence** | `results/paper/chao_method_comparison_d5.json`, `experiments/compare_chao_methods.py` |
+
 ---
 
 ## 3. Test audit
@@ -190,8 +200,7 @@ Source: `results/scaling/scaling_table.csv`
 
 | ID | Issue | Next action |
 |----|-------|-------------|
-| — | Analytic mapped MSE gap vs gradient at d≥7 | Document capitalization residual; optional sym_qsp baseline (v1.1 item 3) |
-| — | v1.1 paper items 3–5 | Chao sym_qsp baseline; off-grid test; barren plateaus discussion |
+| — | v1.1 paper items 4–5 | Off-grid test; barren plateaus discussion |
 
 ---
 
