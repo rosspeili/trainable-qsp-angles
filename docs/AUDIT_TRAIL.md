@@ -23,6 +23,7 @@
 | Chao sym_qsp audit (item 3) | ✅ Done | Native ≲10⁻¹⁵; mapped MSE unchanged vs Laurent |
 | Off-grid random eval (item 4) | ✅ Done | Learned max 2.9×10⁻² vs analytic ~1.8×10⁻¹ |
 | Barren plateaus discussion (item 5) | ✅ Done | §5.3 + McClean/Cerezo cites |
+| Zenodo v1.1 release | ✅ Ready | PDF + results zip; see [`CHANGELOG.md`](../CHANGELOG.md) |
 
 ---
 
@@ -187,6 +188,14 @@ Source: `results/scaling/scaling_table.csv`
 | **Cites** | McClean et al. 2018 (`mcclean2018barren`); Cerezo et al. 2021 (already in bib) |
 | **Evidence** | Multi-seed success to $d=15$; nonzero final $\|\nabla\mathcal{L}\|$ in scaling CSV |
 
+### AUD-028 · success · `release` · Zenodo v1.1 docs sync
+
+| | |
+|---|---|
+| **What** | Version 1.1.0 across CHANGELOG, CITATION.cff, NOTICE, README, manuscript badge |
+| **PDF name** | `Peilivanidis_2026_trainable-qsp-angles_manuscript_v1.1.pdf` |
+| **DOI** | Same record `10.5281/zenodo.20645403`, new Zenodo version **1.1** |
+
 ---
 
 ## 3. Test audit
@@ -219,7 +228,7 @@ Source: `results/scaling/scaling_table.csv`
 
 | ID | Issue | Next action |
 |----|-------|-------------|
-| — | Zenodo v1.1 release | Recompile PDF; upload results zip + paper after user review |
+| — | *(none)* | v1.1 docs and manuscript aligned 2026-06-12 |
 
 ---
 
@@ -250,7 +259,7 @@ For failed experiment runs, always attach:
 
 ## 7. Chronological index (machine log)
 
-Full append-only log: [`audit/LOG.jsonl`](audit/LOG.jsonl) (22 entries as of 2026-06-12).
+Full append-only log: [`audit/LOG.jsonl`](audit/LOG.jsonl) (28 entries as of 2026-06-12).
 
 ```bash
 py -3.13 -m experiments.audit list --last 20

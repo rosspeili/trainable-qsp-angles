@@ -11,6 +11,7 @@ Research code and manuscript for learning Quantum Signal Processing (QSP) phase 
 This repository is the canonical home for the paper, reproducible experiments, notebooks, and tests. It evolved from the earlier [PennyLane community demo](https://github.com/rosspeili/qsp-pennylane-demo) but is maintained here as a standalone research project.
 
 [![DOI](https://img.shields.io/badge/DOI-20645403-ddd6fe?style=flat-square)](https://doi.org/10.5281/zenodo.20645403)
+[![Version](https://img.shields.io/badge/Version-1.1.0-c4b5fd?style=flat-square)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/License-Apache_2.0-efcefa?style=flat-square)](LICENSE)
 ![Python](https://img.shields.io/badge/Python-3.13%2B-bae6fd?style=flat-square)
 ![JAX](https://img.shields.io/badge/JAX-0.4.25%2B-a5f3fc?style=flat-square)
@@ -27,8 +28,7 @@ Quantum Signal Processing encodes polynomial transformations of a scalar signal 
 Primary contributions (current state):
 
 - A **JAX-traceable flat QSP circuit** (avoiding high-level QSVT templates that capture concrete values and break gradients — documented first in our PennyLane reference code)
-- A **reproducible degree-5 benchmark** (Chebyshev approximation of `sin(x)`) with multi-seed reliability, degree scaling, hyperparameter ablation, and mapped analytic baselines (PennyLane + Chao/pyqsp)
-- **v1.1 extensions:** multi-seed at $d=7$ and $d=15$; Chao `sym_qsp` audit; off-grid max-error probe; barren-plateau discussion in the manuscript
+- A **reproducible degree-5 benchmark** (Chebyshev approximation of `sin(x)`) with multi-seed reliability ($d=5$, $7$, $15$), degree scaling, hyperparameter ablation, off-grid probe, and mapped analytic baselines (PennyLane + Chao/pyqsp)
 - A **phase-convention protocol** for fair baseline comparison ([`docs/CONVENTIONS.md`](docs/CONVENTIONS.md))
 - The accompanying **manuscript** (`manuscript.tex`, self-contained via `manuscript_numbers.tex`)
 
@@ -102,6 +102,8 @@ pdflatex manuscript.tex
 
 No external `.dat` files are required; figures use coordinates from `manuscript_numbers.tex`.
 
+**Zenodo PDF name (v1.1):** `Peilivanidis_2026_trainable-qsp-angles_manuscript_v1.1.pdf` — save your compiled output with this filename before upload. Same DOI record (`10.5281/zenodo.20645403`), new version **1.1**.
+
 ---
 
 ## Repository Layout
@@ -167,7 +169,9 @@ The default target is a **degree-5 Chebyshev approximation of `sin(x)`** on `[-1
 
 ![Target polynomial vs. sin(x)](target_polynomial.png)
 
-After 500 Adam steps (lr=0.05, 64-point grid), Phase 2 reference results (seed 0, from `results/paper/`):
+*Figure: degree-5 Chebyshev target used in the benchmark (solid) vs. `sin(x)` reference (dashed). Training minimizes MSE to the polynomial, not to `sin(x)` directly.*
+
+After 500 Adam steps (lr=0.05, 64-point grid), reference results (seed 0, from `results/paper/`):
 
 - **Train MSE**: $9.6 \times 10^{-5}$
 - **Hold-out MSE**: $1.66 \times 10^{-3}$
@@ -184,6 +188,8 @@ Loss drops from ~1.36 (random initialization) to ~$9.6 \times 10^{-5}$ within 50
 
 ![Training loss and learned polynomial](training_results.png)
 
+*Figure: quick demo snapshot (seed 0) — loss convergence and learned circuit output vs. target polynomial. Paper figures use committed coordinates in `manuscript_numbers.tex`.*
+
 ---
 
 ## Attribution
@@ -196,7 +202,7 @@ If you use this repository **in whole or in part** — code, snippets, notebooks
 
 See [NOTICE](NOTICE) for the full attribution text and suggested citation.
 
-**Cite:** [DOI 10.5281/zenodo.20645403](https://doi.org/10.5281/zenodo.20645403) (Zenodo) · [GitHub repository](https://github.com/rosspeili/trainable-qsp-angles) · [`CITATION.cff`](CITATION.cff) for GitHub/Zenodo metadata
+**Cite:** Peilivanidis, V. (2026). *Learning QSP Phase Angles via Gradient Descent: A Reproducible Benchmark and JAX Implementation Note* (Version 1.1). [DOI 10.5281/zenodo.20645403](https://doi.org/10.5281/zenodo.20645403) · [GitHub](https://github.com/rosspeili/trainable-qsp-angles) · [`CITATION.cff`](CITATION.cff)
 
 ---
 

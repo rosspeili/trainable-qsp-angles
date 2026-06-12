@@ -1,6 +1,8 @@
 cff-version: 1.2.0
-title: "Learning QSP Phase Angles via Gradient Descent"
+title: "Learning Quantum Signal Processing Phase Angles via Gradient Descent"
 message: "If you use this software, please cite it as below."
+version: 1.1.0
+date-released: 2026-06-12
 authors:
   - given-names: Vladimiros
     family-names: Peilivanidis
@@ -14,6 +16,7 @@ url: "https://doi.org/10.5281/zenodo.20645403"
 keywords:
   - quantum signal processing
   - QSP
+  - reproducible benchmark
   - JAX
   - differentiable quantum circuits
   - PennyLane
@@ -22,7 +25,8 @@ preferred-citation:
   authors:
     - given-names: Vladimiros
       family-names: Peilivanidis
-  title: "Learning QSP Phase Angles via Gradient Descent: A Reproducible Empirical Study"
+  title: "Learning Quantum Signal Processing Phase Angles via Gradient Descent: A Reproducible Benchmark and JAX Implementation Note"
   year: 2026
+  version: 1.1.0
   doi: 10.5281/zenodo.20645403
   url: "https://doi.org/10.5281/zenodo.20645403"
