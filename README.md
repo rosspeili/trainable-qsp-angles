@@ -1,8 +1,10 @@
 <div align="center">
 
+## Gradient-Based Learning of Quantum Signal Processing Phase Angles
+
 <img src="TRAINING_QSP_PHASE_ANGLES.png" alt="Training QSP Phase Angles via Gradient Descent" width="640">
 
-**A reproducible empirical study with JAX-traceable circuits**
+**A reproducible benchmark and JAX implementation note**
 
 Research code and manuscript for learning Quantum Signal Processing (QSP) phase angles by gradient descent, a framework-agnostic method (flat differentiable circuit + JAX + Optax), with a **PennyLane reference implementation** in `qsp_jax/`.
 
@@ -20,7 +22,7 @@ This repository is the canonical home for the paper, reproducible experiments, n
 
 ## What This Is
 
-Quantum Signal Processing encodes polynomial transformations of a scalar signal into a single-qubit circuit via phase-shifted oracle calls. The classical approach computes phase angles analytically from a target polynomial. This project explores the complementary route: **train phase angles from random initialization** using automatic differentiation and gradient-based optimization.
+Quantum Signal Processing encodes polynomial transformations of a scalar signal into a single-qubit circuit via phase-shifted oracle calls. The classical approach computes phase angles analytically from a target polynomial. This project is a **reproducible benchmark and implementation note** for the complementary route: **train phase angles from random initialization** using automatic differentiation and gradient-based optimization. It is not a new QSP algorithm; it measures when gradient training beats mapped analytic baselines on a shared flat-circuit metric.
 
 Primary contributions (current state):
 

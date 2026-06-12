@@ -14,7 +14,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Entries refere
 - Phase 2 experiment results generated locally (AUD-020): 30-seed, scaling, ablation.
 
 ### Changed
-- Analytic baselines report **mapped** flat-circuit MSE as primary metric; unmapped retained.
+- **v1.1 item 1 (AUD-2026-06-12-023):** Manuscript reframed as reproducible benchmark + JAX implementation note (not a new QSP algorithm); subtitle, abstract, contributions C1–C4, Discussion scope, Outlook; README aligned. `arpa_logo.png` is paper-only (local, gitignored).
 - PennyLane mapped metrics use shared Chebyshev→pyqsp→flat bridge at all degrees (AUD-019).
 - `RESEARCH_PLAN.md`: Phase 2 marked complete.
 - **Manuscript Phase 3:** author name (Vladimiros Peilivanidis), shorter abstract, self-contained figures via `manuscript_numbers.tex`, DOI/ORCID badges; README and docs synced.

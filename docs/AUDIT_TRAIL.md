@@ -8,7 +8,7 @@
 
 ---
 
-## Quick status (2026-06-11)
+## Quick status (2026-06-12)
 
 | Area | Status | Notes |
 |------|--------|-------|
@@ -18,6 +18,7 @@
 | Convention alignment | ✅ Mapped | `phi_flat = pi/2 - phi_chao`; PL mapped via shared bridge (docs/CONVENTIONS.md) |
 | Phase 2 sweeps (30-seed) | ✅ Done | `results/t1_degree5/summary.json` (30 seeds) |
 | Paper CSV (3-row baseline) | ✅ Done | `results/paper/baseline_comparison_d5.csv` |
+| Manuscript v1.1 reframing | ✅ Done | Benchmark + implementation note scope (AUD-2026-06-12-023) |
 
 ---
 
@@ -138,6 +139,15 @@ Source: `results/t1_degree5/summary.json`
 
 Source: `results/scaling/scaling_table.csv`
 
+### AUD-023 · fixed · `paper` · Manuscript v1.1 benchmark reframing
+
+| | |
+|---|---|
+| **What changed** | Subtitle, abstract, §1.3 scope, C1–C4, Discussion opener, Outlook reframed as benchmark + implementation note (not new QSP algorithm) |
+| **Why** | Friend review: claims should match what the repo actually delivers (measurement + reproducibility, not a new solver) |
+| **Logo** | `arpa_logo.png` on title page (top-left); **local only**, gitignored, not on GitHub |
+| **Evidence** | `manuscript.tex`, `README.md`, `CHANGELOG.md` |
+
 ---
 
 ## 3. Test audit
@@ -170,9 +180,8 @@ Source: `results/scaling/scaling_table.csv`
 
 | ID | Issue | Next action |
 |----|-------|-------------|
-| — | Manuscript figures from JSON | Phase 3 pgfplots |
-| — | Analytic mapped MSE gap vs gradient at d≥7 | Document capitalization residual; optional joint refine |
-| — | Phase 3 paper rewrite | Results, Limitations, Outlook |
+| — | Analytic mapped MSE gap vs gradient at d≥7 | Document capitalization residual; optional sym_qsp baseline (v1.1 item 3) |
+| — | v1.1 paper items 2–5 | Multi-seed scaling d=7/15; off-grid test; barren plateaus discussion |
 
 ---
 
@@ -203,7 +212,7 @@ For failed experiment runs, always attach:
 
 ## 7. Chronological index (machine log)
 
-Full append-only log: [`audit/LOG.jsonl`](audit/LOG.jsonl) (17 entries as of 2026-06-11).
+Full append-only log: [`audit/LOG.jsonl`](audit/LOG.jsonl) (18 entries as of 2026-06-12).
 
 ```bash
 py -3.13 -m experiments.audit list --last 20
@@ -212,4 +221,4 @@ py -3.13 -m experiments.audit list --label convention-mismatch
 
 ---
 
-*Last updated: 2026-06-11 — sync with `docs/audit/LOG.jsonl` when adding entries.*
+*Last updated: 2026-06-12 — sync with `docs/audit/LOG.jsonl` when adding entries.*

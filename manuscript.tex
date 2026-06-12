@@ -73,7 +73,7 @@
 \pagestyle{fancy}
 \fancyhf{}
 \fancyhead[L]{\small\color{graytext}V. Peilivanidis}
-\fancyhead[R]{\small\color{graytext}Learning QSP Phase Angles --- Empirical Study}
+\fancyhead[R]{\small\color{graytext}Learning QSP Phase Angles --- Benchmark \& Implementation Note}
 \fancyfoot[C]{\small\thepage}
 \renewcommand{\headrulewidth}{0.3pt}
 \renewcommand{\footrulewidth}{0pt}
@@ -145,7 +145,7 @@
   {\LARGE\bfseries Learning Quantum Signal Processing Phase Angles%
   \\ via Gradient Descent}\\[0.55em]
   {\normalsize\normalfont\color{accent}
-   A Reproducible Empirical Study with JAX-Traceable Circuits}
+   A Reproducible Benchmark and JAX Implementation Note}
 }
 
 \author{%
@@ -163,6 +163,12 @@
 
 \maketitle
 \thispagestyle{firstpage}
+
+%% arpa_logo.png: local paper asset only (gitignored; not on GitHub)
+\begin{tikzpicture}[remember picture, overlay]
+  \node[anchor=north west, xshift=0.15cm, yshift=-0.35cm] at (current page.north west) {%
+    \includegraphics[height=1.15cm]{arpa_logo.png}};
+\end{tikzpicture}
 
 \begin{center}
 \begin{tcolorbox}[
@@ -185,11 +191,12 @@
 \begin{minipage}{0.92\textwidth}
 \small
 \textbf{Abstract.}\quad
-Quantum Signal Processing (QSP) builds a one-qubit circuit that evaluates a polynomial in a scalar signal~$x$. Classically, the circuit's phase angles are computed by analytic solvers; here we \emph{learn} them from random initialization with gradient descent on a flat, JAX-traceable circuit (PennyLane is reference-only). On a standard degree-5 Chebyshev approximation of $\sin(x)$, Adam training reaches train MSE $9.6\times10^{-5}$ for seed~0---better than mapped analytic baselines ($\approx4.7\times10^{-3}$) on the same circuit---and 30/30 random seeds converge below $10^{-3}$. We report degree scaling, phase-convention mapping between solvers and the training circuit, and a QSVT-template pitfall that breaks JAX autodiff. Scripts, audit logs, and reproducible numbers are released under Apache~2.0.
+This report documents a \emph{reproducible benchmark} and reference implementation for learning Quantum Signal Processing (QSP) phase angles by gradient descent on a flat, JAX-traceable circuit (PennyLane is reference-only). We do not propose a new QSP algorithm; we measure when gradient training is preferable to mapped analytic solvers on a shared flat-circuit metric. On a standard degree-5 Chebyshev approximation of $\sin(x)$, Adam reaches train MSE $9.6\times10^{-5}$ for seed~0---better than mapped analytic baselines ($\approx4.7\times10^{-3}$) on the same circuit---and 30/30 random seeds converge below $10^{-3}$. We release degree-scaling tables, a phase-convention mapping protocol between solvers and the training circuit, audit logs, and an implementation note on a QSVT-template pitfall that breaks JAX autodiff. All scripts and hardcoded figure values are under Apache~2.0.
 
 \vspace{6pt}
 \noindent\textbf{Keywords:}\quad
 quantum signal processing (QSP) $\cdot$
+reproducible benchmark $\cdot$
 quantum singular value transformation (QSVT) $\cdot$
 phase angle optimization $\cdot$
 differentiable quantum circuits $\cdot$
@@ -221,16 +228,18 @@ The practical challenge is computing those phase angles. Given a target polynomi
 
 \subsection{This Work}
 
-We explore a complementary approach: \emph{learning} phase angles from random initialization using gradient descent. The key observation is that a QSP circuit, when implemented correctly as a differentiable quantum program, admits automatic differentiation through all its parameters. This makes it possible to minimize any differentiable loss over the phase angles using standard optimizers.
+\textbf{Scope.} This is a \emph{benchmark and implementation note}, not a new QSP theory or solver. Gradient descent on phase angles is already known in variational settings; our contribution is to \emph{measure}, \emph{document}, and \emph{release} a reproducible protocol for when that route beats mapped analytic baselines on a flat, JAX-traceable circuit.
 
-We demonstrate this via a publicly available reference implementation~\cite{peili_trainable_qsp_2026} using PennyLane~\cite{pennylane2022} with JAX~\cite{jax2018github}; the underlying flat-circuit recipe transfers to other SDKs such as Qiskit~\cite{qiskit2024}, Cirq~\cite{cirq2024}, or TensorFlow Quantum~\cite{broughton2020tfq} when parameters remain live in the autodiff graph. We identify and resolve a non-obvious incompatibility between template-based QSVT constructors and JAX tracing in our PennyLane code path, and provide the correct flat-circuit pattern.
+We explore learning phase angles from random initialization using gradient descent. The key observation is that a QSP circuit, when implemented correctly as a differentiable quantum program, admits automatic differentiation through all its parameters---making it possible to minimize any differentiable loss over the phase angles with standard optimizers.
+
+We demonstrate this via a publicly available reference implementation~\cite{peili_trainable_qsp_2026} using PennyLane~\cite{pennylane2022} with JAX~\cite{jax2018github}; the underlying flat-circuit recipe transfers to other SDKs such as Qiskit~\cite{qiskit2024}, Cirq~\cite{cirq2024}, or TensorFlow Quantum~\cite{broughton2020tfq} when parameters remain live in the autodiff graph. We identify and document a non-obvious incompatibility between template-based QSVT constructors and JAX tracing in our PennyLane code path, and provide the correct flat-circuit pattern.
 
 \begin{tcolorbox}[contribbox]
 \begin{itemize}\setlength\itemsep{3pt}
-  \item[\textbf{C1.}] We show that high-level QSVT template APIs can capture operator values at circuit-build time, breaking JAX differentiability through phase angles (observed in PennyLane's \texttt{qml.QSVT}), and provide a flat-circuit workaround that preserves end-to-end gradient flow.
-  \item[\textbf{C2.}] We provide a reproducible benchmark pipeline (30-seed statistics, scaling, ablations) for a degree-5 Chebyshev $\sin$ target, reporting convergence from MSE $\approx1.36$ to $9.6\times10^{-5}$ in 500 Adam steps (reference seed).
-  \item[\textbf{C3.}] We compare gradient training to analytic baselines on equal footing---including convention mapping for flat-circuit evaluation---and provide an updated decision guide grounded in measured trade-offs.
-  \item[\textbf{C4.}] All code, experiments, and an interactive notebook are released under the Apache~2.0 license at \href{https://github.com/rosspeili/trainable-qsp-angles}{\texttt{github.com/rosspeili/trainable-qsp-angles}}.
+  \item[\textbf{C1.}] \textbf{Implementation note:} high-level QSVT template APIs can capture operator values at circuit-build time, breaking JAX differentiability through phase angles (observed in PennyLane's \texttt{qml.QSVT}); we provide a flat-circuit workaround that preserves end-to-end gradient flow.
+  \item[\textbf{C2.}] \textbf{Benchmark artifacts:} a reproducible pipeline (30-seed statistics, degree scaling, hyperparameter ablation) for a degree-5 Chebyshev $\sin$ target, reporting convergence from MSE $\approx1.36$ to $9.6\times10^{-5}$ in 500 Adam steps (reference seed).
+  \item[\textbf{C3.}] \textbf{Convention protocol:} fair comparison of gradient training to analytic baselines via mapped flat-circuit evaluation ($\phi_{\mathrm{flat}}=\pi/2-\phi_{\mathrm{chao}}$), with an updated decision guide grounded in measured trade-offs.
+  \item[\textbf{C4.}] \textbf{Open release:} code, experiment logs, audit trail, hardcoded figure values, and an interactive notebook under Apache~2.0 at \href{https://github.com/rosspeili/trainable-qsp-angles}{\texttt{github.com/rosspeili/trainable-qsp-angles}}.
 \end{itemize}
 \end{tcolorbox}
 
@@ -727,6 +736,8 @@ Figure~\ref{fig:poly} shows the Chebyshev target, the trained circuit output $\l
 \section{Discussion}
 %% ============================================================
 
+This section interprets the benchmark results above. We do not claim a universally superior QSP solver; we compare approaches on the \emph{flat-circuit MSE} used for training and on reproducibility criteria (convention mapping, multi-seed reliability, scaling tables).
+
 \subsection{Analytic Solvers vs.\ Gradient Training}
 
 \begin{table}[ht]
@@ -772,7 +783,7 @@ The implementation, experiment scripts, audit trail (\texttt{docs/AUDIT\_TRAIL.m
 
 \section{Outlook}
 
-Gradient-learned QSP phases are most compelling when the training objective \emph{is} the flat differentiable circuit---for example, QSP blocks inside variational pipelines with implicit targets. Immediate extensions include curriculum training across degree, tighter convention alignment for analytic baselines, and optional cross-SDK validation. The combination of interpretable polynomial structure and automatic differentiation remains a practical template for quantum subroutine design.
+Within the scope of this benchmark, gradient-learned QSP phases are most compelling when the training objective \emph{is} the flat differentiable circuit---for example, QSP blocks inside variational pipelines with implicit targets. Immediate extensions include multi-seed scaling at higher degrees, off-grid generalization tests, tighter convention alignment for analytic baselines (sym\_qsp / machine precision where available), and optional cross-SDK validation. The combination of interpretable polynomial structure and automatic differentiation remains a practical template for quantum subroutine design when the loss is end-to-end differentiable.
 
 %% ============================================================
 %% (Former extended speculative section condensed into Outlook above.)
