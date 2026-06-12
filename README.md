@@ -7,11 +7,13 @@
 **A reproducible benchmark and JAX implementation note**
 
 [![DOI](https://img.shields.io/badge/DOI-20645402-ddd6fe?style=flat-square)](https://doi.org/10.5281/zenodo.20645402)
-[![Version](https://img.shields.io/badge/Version-1.1.0-c4b5fd?style=flat-square)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/License-Apache_2.0-efcefa?style=flat-square)](LICENSE)
 ![Python](https://img.shields.io/badge/Python-3.13%2B-bae6fd?style=flat-square)
 ![JAX](https://img.shields.io/badge/JAX-0.4.25%2B-a5f3fc?style=flat-square)
 ![PennyLane](https://img.shields.io/badge/PennyLane-0.44%2B-e9d5ff?style=flat-square)
+
+[![nbviewer](https://img.shields.io/badge/nbviewer-fef9c3?style=flat-square&logo=jupyter&logoColor=555)](https://nbviewer.org/github/rosspeili/trainable-qsp-angles/blob/main/demo.ipynb)
+[![Colab](https://img.shields.io/badge/Google%20Colab-fed7aa?style=flat-square&logo=googlecolab&logoColor=555)](https://colab.research.google.com/drive/1DMzUcgpMklLP4iX1uQJew1lR6mCnvOks?usp=sharing)
 
 </div>
 
