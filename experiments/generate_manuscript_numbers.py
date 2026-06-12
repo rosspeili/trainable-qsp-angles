@@ -16,6 +16,12 @@ from qsp_jax.polynomial import target_poly
 
 HIGHER_MULTI_SEED_DEGREES = (7, 15)
 
+# LaTeX command names must be letters only (no digits after \MultiSeedD).
+DEGREE_MACRO_PREFIX = {
+    7: "MultiSeedDSeven",
+    15: "MultiSeedDFifteen",
+}
+
 
 def latex_sci(value: float, sig: int = 1) -> str:
     """Format a positive float as LaTeX math (e.g. 6.3\\times10^{-5})."""
@@ -147,7 +153,7 @@ def offgrid_block(results: Path, degree: int = 5, seed: int = 0) -> list[str]:
 def higher_degree_blocks(results: Path) -> list[str]:
     lines: list[str] = ["% --- v1.1 higher-degree multi-seed (additive; does not alter legacy macros) ---", ""]
     for degree in HIGHER_MULTI_SEED_DEGREES:
-        prefix = f"MultiSeedD{degree}"
+        prefix = DEGREE_MACRO_PREFIX[degree]
         coords = multi_seed_coords_block(results, degree=degree, macro_name=f"{prefix}Coords")
         stats = multi_seed_stats_block(results, degree=degree, prefix=prefix)
         if coords or stats:

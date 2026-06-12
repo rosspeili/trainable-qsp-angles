@@ -584,7 +584,7 @@ We repeated training for 30 independent seeds at degree~5. Train MSE exhibits a 
 \subsection{Multi-Seed at Higher Degree}
 \label{sec:multiseed_higher}
 
-To assess reliability beyond the degree-5 headline benchmark, we repeated the default protocol ($500$ Adam steps, lr~$0.05$, uniform init in $[-0.5,0.5]$) for $n=\MultiSeedD7NSeeds$ independent seeds at $d=7$ and $d=15$. Table~\ref{tab:multiseed_higher} summarizes train and hold-out MSE; Figures~\ref{fig:multiseed_d7} and~\ref{fig:multiseed_d15} mirror the scatter format of Figure~\ref{fig:multiseed}. All seeds at both degrees converged below the protocol success threshold ($10^{-3}$ train MSE).
+To assess reliability beyond the degree-5 headline benchmark, we repeated the default protocol ($500$ Adam steps, lr~$0.05$, uniform init in $[-0.5,0.5]$) for $n=\MultiSeedDSevenNSeeds$ independent seeds at $d=7$ and $d=15$. Table~\ref{tab:multiseed_higher} summarizes train and hold-out MSE; Figures~\ref{fig:multiseed_d7} and~\ref{fig:multiseed_d15} mirror the scatter format of Figure~\ref{fig:multiseed}. All seeds at both degrees converged below the protocol success threshold ($10^{-3}$ train MSE).
 
 \begin{table}[ht]
 \centering\small
@@ -592,8 +592,8 @@ To assess reliability beyond the degree-5 headline benchmark, we repeated the de
   \toprule
   \textbf{$d$} & \textbf{Train median} & \textbf{Train mean} & \textbf{Train stdev} & \textbf{Hold-out median} & \textbf{Success ($<10^{-3}$)} \\
   \midrule
-  7  & $\MultiSeedD7TrainMedian$  & $\MultiSeedD7TrainMean$  & $\MultiSeedD7TrainStdev$  & $\MultiSeedD7HoldoutMedian$  & \MultiSeedD7NSuccess/\MultiSeedD7NSeeds \\
-  15 & $\MultiSeedD15TrainMedian$ & $\MultiSeedD15TrainMean$ & $\MultiSeedD15TrainStdev$ & $\MultiSeedD15HoldoutMedian$ & \MultiSeedD15NSuccess/\MultiSeedD15NSeeds \\
+  7  & $\MultiSeedDSevenTrainMedian$  & $\MultiSeedDSevenTrainMean$  & $\MultiSeedDSevenTrainStdev$  & $\MultiSeedDSevenHoldoutMedian$  & \MultiSeedDSevenNSuccess/\MultiSeedDSevenNSeeds \\
+  15 & $\MultiSeedDFifteenTrainMedian$ & $\MultiSeedDFifteenTrainMean$ & $\MultiSeedDFifteenTrainStdev$ & $\MultiSeedDFifteenHoldoutMedian$ & \MultiSeedDFifteenNSuccess/\MultiSeedDFifteenNSeeds \\
   \bottomrule
 \end{tabular}
 \caption{Multi-seed statistics at $d=7$ and $d=15$ (T1, default protocol). Source: \texttt{results/t1\_degree7/summary.json}, \texttt{results/t1\_degree15/summary.json}.}
@@ -609,7 +609,7 @@ To assess reliability beyond the degree-5 headline benchmark, we repeated the de
   xlabel={Seed index},
   xmin=-1, xmax=30,
   xtick={0,5,10,15,20,25,29},
-  ymin=\MultiSeedD7YMin, ymax=\MultiSeedD7YMax,
+  ymin=\MultiSeedDSevenYMin, ymax=\MultiSeedDSevenYMax,
   grid=both,
   grid style={line width=0.3pt, draw=lightrule},
   axis line style={accent},
@@ -618,11 +618,11 @@ To assess reliability beyond the degree-5 headline benchmark, we repeated the de
   xlabel style={font=\small},
 ]
 \addplot[accent, only marks, mark=*, mark size=1.8pt, opacity=0.85]
-  coordinates {\MultiSeedD7Coords};
-\addplot[accent, dashed, thick] coordinates {(-1,\MultiSeedD7TrainMedianNum) (30,\MultiSeedD7TrainMedianNum)};
+  coordinates {\MultiSeedDSevenCoords};
+\addplot[accent, dashed, thick] coordinates {(-1,\MultiSeedDSevenTrainMedianNum) (30,\MultiSeedDSevenTrainMedianNum)};
 \end{semilogyaxis}
 \end{tikzpicture}
-\caption{Per-seed train MSE at degree~7 ($n=\MultiSeedD7NSeeds$). Dashed line: median $\MultiSeedD7TrainMedian$.}
+\caption{Per-seed train MSE at degree~7 ($n=\MultiSeedDSevenNSeeds$). Dashed line: median $\MultiSeedDSevenTrainMedian$.}
 \label{fig:multiseed_d7}
 \end{figure}
 
@@ -635,7 +635,7 @@ To assess reliability beyond the degree-5 headline benchmark, we repeated the de
   xlabel={Seed index},
   xmin=-1, xmax=30,
   xtick={0,5,10,15,20,25,29},
-  ymin=\MultiSeedD15YMin, ymax=\MultiSeedD15YMax,
+  ymin=\MultiSeedDFifteenYMin, ymax=\MultiSeedDFifteenYMax,
   grid=both,
   grid style={line width=0.3pt, draw=lightrule},
   axis line style={accent},
@@ -644,11 +644,11 @@ To assess reliability beyond the degree-5 headline benchmark, we repeated the de
   xlabel style={font=\small},
 ]
 \addplot[accent, only marks, mark=*, mark size=1.8pt, opacity=0.85]
-  coordinates {\MultiSeedD15Coords};
-\addplot[accent, dashed, thick] coordinates {(-1,\MultiSeedD15TrainMedianNum) (30,\MultiSeedD15TrainMedianNum)};
+  coordinates {\MultiSeedDFifteenCoords};
+\addplot[accent, dashed, thick] coordinates {(-1,\MultiSeedDFifteenTrainMedianNum) (30,\MultiSeedDFifteenTrainMedianNum)};
 \end{semilogyaxis}
 \end{tikzpicture}
-\caption{Per-seed train MSE at degree~15 ($n=\MultiSeedD15NSeeds$). Dashed line: median $\MultiSeedD15TrainMedian$.}
+\caption{Per-seed train MSE at degree~15 ($n=\MultiSeedDFifteenNSeeds$). Dashed line: median $\MultiSeedDFifteenTrainMedian$.}
 \label{fig:multiseed_d15}
 \end{figure}
 
@@ -722,7 +722,7 @@ We audited the Chao row against pyqsp's \texttt{sym\_qsp} solver (machine-precis
 \subsection{Off-Grid Generalization}
 \label{sec:offgrid}
 
-Train and hold-out MSE in Table~\ref{tab:baseline} use fixed uniform grids. To probe generalization between grid points, we draw $n=\OffgridNPoints$ uniform random samples in $[-0.95,0.95]$ that do not coincide with the $64$-point training grid (off-grid seed~42) and report maximum pointwise error $| \langle X\rangle_{\boldsymbol{\phi}}(x) - P_{\mathrm{target}}(x) |$ (Table~\ref{tab:offgrid}). Learned phases achieve off-grid max error $\OffgridLearnedMax$, below mapped analytic baselines ($\OffgridPennyLaneMax$ / $\OffgridChaoMax$) and consistent with the training-grid max error ($3.4\times10^{-2}$ in Table~\ref{tab:baseline} row~1). Source: \texttt{results/paper/offgrid\_random\_d5\_seed0.json} via \texttt{experiments.offgrid\_eval}.
+Train and hold-out MSE in Table~\ref{tab:baseline} use fixed uniform grids. To probe generalization between grid points, we draw $n=\OffgridNPoints$ uniform random samples in $[-0.95,0.95]$ that do not coincide with the $64$-point training grid (off-grid seed~42) and report maximum pointwise error $| \langle X\rangle_{\boldsymbol{\phi}}(x) - P_{\mathrm{target}}(x) |$ (Table~\ref{tab:offgrid}). Learned phases achieve off-grid max error $\OffgridLearnedMax$, below mapped analytic baselines ($\OffgridPennyLaneMax$ / $\OffgridChaoMax$) and consistent with the training-grid max error ($3.42\times10^{-2}$ in Section~4.1). Source: \texttt{results/paper/offgrid\_random\_d5\_seed0.json} via \texttt{experiments.offgrid\_eval}.
 
 \begin{table}[ht]
 \centering\small
@@ -852,7 +852,7 @@ This section interprets the benchmark results above. We do not claim a universal
 
 \subsection{Loss Landscape and Scaling}
 
-The QSP loss landscape is non-convex. At degree~5, 30/30 seeds converged below $10^{-3}$ train MSE with uniform initialization in $[-0.5,0.5]$; the same holds at $d=7$ and $d=15$ under the default protocol (Section~\ref{sec:multiseed_higher}). At $d=15$, seed~0 hold-out error in the scaling snapshot ($\sim2.3\times10^{-2}$) exceeds the multi-seed hold-out median ($\MultiSeedD15HoldoutMedian$), indicating seed-dependent generalization on the dense hold-out grid rather than systematic optimization failure.
+The QSP loss landscape is non-convex. At degree~5, 30/30 seeds converged below $10^{-3}$ train MSE with uniform initialization in $[-0.5,0.5]$; the same holds at $d=7$ and $d=15$ under the default protocol (Section~\ref{sec:multiseed_higher}). At $d=15$, seed~0 hold-out error in the scaling snapshot ($\sim2.3\times10^{-2}$) exceeds the multi-seed hold-out median ($\MultiSeedDFifteenHoldoutMedian$), indicating seed-dependent generalization on the dense hold-out grid rather than systematic optimization failure.
 
 \subsection{Barren Plateaus and Trainability}
 \label{sec:barren}
@@ -869,7 +869,7 @@ The flat-circuit pattern described in Section~3.3 is the correct workaround for 
 
 \subsection{Reproducibility}
 
-The implementation, experiment scripts, audit trail (\texttt{docs/AUDIT\_TRAIL.md}), and hardcoded figure values (\texttt{manuscript\_numbers.tex}) are available at \url{https://github.com/rosspeili/trainable-qsp-angles}~\cite{peili_trainable_qsp_2026} (DOI: \href{https://doi.org/10.5281/zenodo.20645403}{10.5281/zenodo.20645403}). Regenerate \texttt{manuscript\_numbers.tex} with \texttt{py -3.13 -m experiments.sweep all}, \texttt{py -3.13 -m experiments.summarize baseline}, and \texttt{py -3.13 -m experiments.generate\_manuscript\_numbers}.
+The implementation, experiment scripts, audit trail (\texttt{docs/AUDIT\_TRAIL.md}), and hardcoded figure values (\texttt{manuscript\_numbers.tex}) are available at \url{https://github.com/rosspeili/trainable-qsp-angles}~\cite{peili_trainable_qsp_2026} (DOI: \href{https://doi.org/10.5281/zenodo.20645403}{10.5281/zenodo.20645403}). Regenerate additive macros with targeted sweeps (e.g.\ \texttt{py -3.13 -m experiments.sweep multi-seed --degrees 7,15}) and \texttt{py -3.13 -m experiments.generate\_manuscript\_numbers}; legacy figure blocks are golden-tested against committed values.
 
 \subsection{Limitations}
 \label{sec:limitations}
@@ -879,7 +879,7 @@ The implementation, experiment scripts, audit trail (\texttt{docs/AUDIT\_TRAIL.m
   \item \textbf{Single target family.} Results apply to one Chebyshev $\sin$ benchmark (T1); other polynomials may behave differently.
   \item \textbf{Simulation only.} No shot noise, hardware, or transpilation effects.
   \item \textbf{Scaling statistics.} Degree scaling curve (Figure~\ref{fig:scaling}) uses one seed per degree; multi-seed statistics are reported at $d=5$ (Figure~\ref{fig:multiseed}) and $d\in\{7,15\}$ (Section~\ref{sec:multiseed_higher}).
-  \item \textbf{Ablation scope.} Hyperparameter ablation (Section~\ref{sec:ablation}) uses seed~0 only; multi-seed stats cover the default protocol at $d=5$.
+  \item \textbf{Ablation scope.} Hyperparameter ablation (Section~\ref{sec:ablation}) uses seed~0 only; multi-seed statistics cover the default protocol at $d=5$, $7$, and $15$.
   \item \textbf{Off-grid probe.} Section~\ref{sec:offgrid} uses one random off-grid draw (1024 points, seed~42) at $d=5$ only; it is not a hold-out set for hyperparameter tuning.
   \item \textbf{Reference stack.} One PennyLane+JAX implementation; the flat-circuit recipe is portable but not cross-validated on hardware here.
 \end{itemize}
@@ -888,20 +888,7 @@ The implementation, experiment scripts, audit trail (\texttt{docs/AUDIT\_TRAIL.m
 
 Within the scope of this benchmark, gradient-learned QSP phases are most compelling when the training objective \emph{is} the flat differentiable circuit---for example, QSP blocks inside variational pipelines with implicit targets. Immediate extensions include optional cross-SDK validation and systematic gradient-variance studies when QSP is embedded in larger ans\"atze. The combination of interpretable polynomial structure and automatic differentiation remains a practical template for quantum subroutine design when the loss is end-to-end differentiable.
 
-%% ============================================================
-%% (Former extended speculative section condensed into Outlook above.)
-%% ============================================================
-
-
-
-
-
-
-
-
 \nocite{*}
 \printbibliography
-
-
 
 \end{document}
