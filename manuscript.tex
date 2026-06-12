@@ -854,6 +854,15 @@ This section interprets the benchmark results above. We do not claim a universal
 
 The QSP loss landscape is non-convex. At degree~5, 30/30 seeds converged below $10^{-3}$ train MSE with uniform initialization in $[-0.5,0.5]$; the same holds at $d=7$ and $d=15$ under the default protocol (Section~\ref{sec:multiseed_higher}). At $d=15$, seed~0 hold-out error in the scaling snapshot ($\sim2.3\times10^{-2}$) exceeds the multi-seed hold-out median ($\MultiSeedD15HoldoutMedian$), indicating seed-dependent generalization on the dense hold-out grid rather than systematic optimization failure.
 
+\subsection{Barren Plateaus and Trainability}
+\label{sec:barren}
+
+Variational quantum algorithms can suffer from \emph{barren plateaus}---exponentially vanishing gradient variance in deep or globally entangling ans\"atze, making random initialization unlikely to find a useful descent direction~\cite{mcclean2018barren,cerezo2021variational}. Our benchmark is \emph{not} a generic deep VQA: the ansatz has only $d+1$ trainable phases in a fixed QSP skeleton, and the loss is an explicit polynomial MSE rather than an indirect energy functional.
+
+Within this restricted setting, we find no empirical sign of optimization collapse up to $d=15$. Multi-seed runs converge under the default protocol (Sections~\ref{sec:multiseed_higher} and~\ref{sec:ablation}), and final gradient norms at the end of 500 Adam steps remain far from zero in the scaling snapshot (e.g.\ $\|\nabla\mathcal{L}\|\approx6.5\times10^{-4}$ at $d=5$ vs.\ $\approx2.1\times10^{-1}$ at $d=15$, seed~0; \texttt{results/scaling/scaling\_table.csv}). That $d=15$ snapshot combines a larger final gradient norm with worse hold-out error, consistent with grid-limited generalization rather than a vanishing-gradient plateau.
+
+We do \emph{not} claim barren plateaus are absent for QSP in general. Embedding QSP blocks inside larger variational circuits, using hardware noise, or scaling to substantially higher degree with unfavorable initialization could reintroduce trainability bottlenecks. Diagnosing gradient variance across degree and circuit context remains useful future work; here we only report that the present flat-circuit benchmark remains trainable through $d=15$ under our protocol.
+
 \subsection{The JAX Traceability Constraint}
 
 The flat-circuit pattern described in Section~3.3 is the correct workaround for JAX-based variational optimization of QSP circuits, and is expected to generalize to multi-qubit block-encoding extensions and to other quantum SDKs when the same traceability rules are respected. JAX transforms functions by tracing them with abstract values; any component that captures concrete arrays at construction time exits the trace. This is not unique to PennyLane---it is a general pitfall for template-heavy circuit APIs combined with JAX-style AD.
@@ -877,7 +886,7 @@ The implementation, experiment scripts, audit trail (\texttt{docs/AUDIT\_TRAIL.m
 
 \section{Outlook}
 
-Within the scope of this benchmark, gradient-learned QSP phases are most compelling when the training objective \emph{is} the flat differentiable circuit---for example, QSP blocks inside variational pipelines with implicit targets. Immediate extensions include optional cross-SDK validation and barren-plateau analysis at higher degree. The combination of interpretable polynomial structure and automatic differentiation remains a practical template for quantum subroutine design when the loss is end-to-end differentiable.
+Within the scope of this benchmark, gradient-learned QSP phases are most compelling when the training objective \emph{is} the flat differentiable circuit---for example, QSP blocks inside variational pipelines with implicit targets. Immediate extensions include optional cross-SDK validation and systematic gradient-variance studies when QSP is embedded in larger ans\"atze. The combination of interpretable polynomial structure and automatic differentiation remains a practical template for quantum subroutine design when the loss is end-to-end differentiable.
 
 %% ============================================================
 %% (Former extended speculative section condensed into Outlook above.)

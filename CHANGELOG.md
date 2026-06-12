@@ -14,6 +14,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Entries refere
 - Phase 2 experiment results generated locally (AUD-020): 30-seed, scaling, ablation.
 
 ### Changed
+- **v1.1 item 5 (AUD-2026-06-12-027):** Discussion §5.3 barren plateaus / trainability; added `mcclean2018barren` to `references.bib`.
 - **v1.1 item 4 (AUD-2026-06-12-026):** Off-grid random max-error eval (`experiments/offgrid_eval.py`); paper §4.5 + Table; additive `\Offgrid*` macros.
 - **v1.1 item 3 (AUD-2026-06-12-025):** Chao sym_qsp audit — machine-precision native recon, same mapped flat MSE as Laurent; paper Limitations + CONVENTIONS updated; `experiments/compare_chao_methods.py`.
 - **v1.1 item 2 (AUD-2026-06-12-024):** Multi-seed sweeps at $d=7$ and $d=15$ (`sweep multi-seed --degrees 7,15`); additive `manuscript_numbers.tex` macros + paper §4.2.1; golden test locks legacy figure data.

@@ -22,6 +22,7 @@
 | Multi-seed d=7, d=15 | ✅ Done | `results/t1_degree7/`, `results/t1_degree15/` (30/30 success each) |
 | Chao sym_qsp audit (item 3) | ✅ Done | Native ≲10⁻¹⁵; mapped MSE unchanged vs Laurent |
 | Off-grid random eval (item 4) | ✅ Done | Learned max 2.9×10⁻² vs analytic ~1.8×10⁻¹ |
+| Barren plateaus discussion (item 5) | ✅ Done | §5.3 + McClean/Cerezo cites |
 
 ---
 
@@ -178,6 +179,14 @@ Source: `results/scaling/scaling_table.csv`
 | **How** | `py -3.13 -m experiments.offgrid_eval`; phases from `baseline_comparison_d5.json` (no retrain) |
 | **Evidence** | `results/paper/offgrid_random_d5_seed0.json`, `manuscript_numbers.tex` `\Offgrid*` macros |
 
+### AUD-027 · fixed · `paper` · Barren plateaus discussion (v1.1 item 5)
+
+| | |
+|---|---|
+| **What** | New Discussion §5.3 on barren plateaus vs our low-parameter QSP benchmark |
+| **Cites** | McClean et al. 2018 (`mcclean2018barren`); Cerezo et al. 2021 (already in bib) |
+| **Evidence** | Multi-seed success to $d=15$; nonzero final $\|\nabla\mathcal{L}\|$ in scaling CSV |
+
 ---
 
 ## 3. Test audit
@@ -210,7 +219,7 @@ Source: `results/scaling/scaling_table.csv`
 
 | ID | Issue | Next action |
 |----|-------|-------------|
-| — | v1.1 paper item 5 | Barren plateaus discussion |
+| — | Zenodo v1.1 release | Recompile PDF; upload results zip + paper after user review |
 
 ---
 
@@ -241,7 +250,7 @@ For failed experiment runs, always attach:
 
 ## 7. Chronological index (machine log)
 
-Full append-only log: [`audit/LOG.jsonl`](audit/LOG.jsonl) (21 entries as of 2026-06-12).
+Full append-only log: [`audit/LOG.jsonl`](audit/LOG.jsonl) (22 entries as of 2026-06-12).
 
 ```bash
 py -3.13 -m experiments.audit list --last 20
