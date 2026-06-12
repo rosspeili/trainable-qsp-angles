@@ -10,7 +10,7 @@ Research code and manuscript for learning Quantum Signal Processing (QSP) phase 
 
 This repository is the canonical home for the paper, reproducible experiments, notebooks, and tests. It evolved from the earlier [PennyLane community demo](https://github.com/rosspeili/qsp-pennylane-demo) but is maintained here as a standalone research project.
 
-[![DOI](https://img.shields.io/badge/DOI-20645403-ddd6fe?style=flat-square)](https://doi.org/10.5281/zenodo.20645403)
+[![DOI](https://img.shields.io/badge/DOI-20645402-ddd6fe?style=flat-square)](https://doi.org/10.5281/zenodo.20645402)
 [![Version](https://img.shields.io/badge/Version-1.1.0-c4b5fd?style=flat-square)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/License-Apache_2.0-efcefa?style=flat-square)](LICENSE)
 ![Python](https://img.shields.io/badge/Python-3.13%2B-bae6fd?style=flat-square)
@@ -102,7 +102,7 @@ pdflatex manuscript.tex
 
 No external `.dat` files are required; figures use coordinates from `manuscript_numbers.tex`.
 
-**Zenodo PDF name (v1.1):** `Peilivanidis_2026_trainable-qsp-angles_manuscript_v1.1.pdf` — save your compiled output with this filename before upload. Same DOI record (`10.5281/zenodo.20645403`), new version **1.1**.
+**Zenodo PDF name (v1.1):** `Peilivanidis_2026_trainable-qsp-angles_manuscript_v1.1.pdf` — save your compiled output with this filename before upload. Cite the **Concept DOI** (`10.5281/zenodo.20645402`); it always resolves to the latest version (currently **1.1**).
 
 ---
 
@@ -202,7 +202,7 @@ If you use this repository **in whole or in part** — code, snippets, notebooks
 
 See [NOTICE](NOTICE) for the full attribution text and suggested citation.
 
-**Cite:** Peilivanidis, V. (2026). *Learning QSP Phase Angles via Gradient Descent: A Reproducible Benchmark and JAX Implementation Note* (Version 1.1). [DOI 10.5281/zenodo.20645403](https://doi.org/10.5281/zenodo.20645403) · [GitHub](https://github.com/rosspeili/trainable-qsp-angles) · [`CITATION.cff`](CITATION.cff)
+**Cite:** Peilivanidis, V. (2026). *Learning QSP Phase Angles via Gradient Descent: A Reproducible Benchmark and JAX Implementation Note* (Version 1.1). [DOI 10.5281/zenodo.20645402](https://doi.org/10.5281/zenodo.20645402) · [GitHub](https://github.com/rosspeili/trainable-qsp-angles) · [`CITATION.cff`](CITATION.cff)
 
 ---
 

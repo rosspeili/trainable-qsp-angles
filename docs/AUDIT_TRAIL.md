@@ -194,7 +194,7 @@ Source: `results/scaling/scaling_table.csv`
 |---|---|
 | **What** | Version 1.1.0 across CHANGELOG, CITATION.cff, NOTICE, README, manuscript badge |
 | **PDF name** | `Peilivanidis_2026_trainable-qsp-angles_manuscript_v1.1.pdf` |
-| **DOI** | Same record `10.5281/zenodo.20645403`, new Zenodo version **1.1** |
+| **DOI** | Concept [10.5281/zenodo.20645402](https://doi.org/10.5281/zenodo.20645402) (latest); v1.1-specific [10.5281/zenodo.20666387](https://doi.org/10.5281/zenodo.20666387) |
 
 ---
 

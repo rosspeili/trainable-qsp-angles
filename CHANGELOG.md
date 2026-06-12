@@ -8,7 +8,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Entries refere
 
 ## [1.1.0] — 2026-06-12
 
-Zenodo version **1.1** ([DOI 10.5281/zenodo.20645403](https://doi.org/10.5281/zenodo.20645403)). Manuscript PDF: `Peilivanidis_2026_trainable-qsp-angles_manuscript_v1.1.pdf`.
+Zenodo version **1.1** ([Concept DOI 10.5281/zenodo.20645402](https://doi.org/10.5281/zenodo.20645402); version-specific: [10.5281/zenodo.20666387](https://doi.org/10.5281/zenodo.20666387)). Manuscript PDF: `Peilivanidis_2026_trainable-qsp-angles_manuscript_v1.1.pdf`.
 
 ### Added
 - Multi-seed sweeps at $d=7$ and $d=15$ (`sweep multi-seed --degrees 7,15`); paper §4.3; additive `manuscript_numbers.tex` macros; golden test locks legacy figure data (AUD-2026-06-12-024).
@@ -25,6 +25,7 @@ Zenodo version **1.1** ([DOI 10.5281/zenodo.20645403](https://doi.org/10.5281/ze
 - Author name (Vladimiros Peilivanidis), self-contained figures via `manuscript_numbers.tex`, DOI/ORCID badges; README and docs synced.
 - Hyperparameter ablation subsection (§4.4); figure fixes (scaling, legend, baseline plot).
 - `CITATION.cff`, `NOTICE`, and bibliography entry aligned with v1.1 subtitle.
+- Primary Zenodo cite updated to **Concept DOI** [10.5281/zenodo.20645402](https://doi.org/10.5281/zenodo.20645402) (replaces v1.0-only `…20645403`).
 
 ### Fixed
 - Convention mismatch (AUD-003, AUD-013): `phi_flat = pi/2 - phi_chao`.
