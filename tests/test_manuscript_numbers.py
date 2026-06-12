@@ -47,4 +47,5 @@ def test_higher_degree_macros_present_after_full_generate():
     assert "\\MultiSeedD7Coords" in text
     assert "\\MultiSeedD15Coords" in text
     assert "\\MultiSeedD7TrainMedian" in text
+    assert "\\OffgridLearnedMax" in text
     test_legacy_blocks_match_committed_manuscript_numbers()

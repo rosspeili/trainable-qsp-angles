@@ -128,6 +128,22 @@ def legacy_blocks(results: Path) -> list[str]:
     return loss_curve_block(results) + lines + scaling_block(results) + poly_fidelity_block(results)
 
 
+def offgrid_block(results: Path, degree: int = 5, seed: int = 0) -> list[str]:
+    path = results / "paper" / f"offgrid_random_d{degree}_seed{seed}.json"
+    if not path.exists():
+        return []
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    by_method = {row["method"]: row["offgrid_max_error"] for row in payload["rows"]}
+    return [
+        f"% Off-grid random max error — {path.as_posix()}",
+        f"\\providecommand{{\\OffgridNPoints}}{{{payload['n_offgrid_points']}}}",
+        f"\\providecommand{{\\OffgridLearnedMax}}{{{latex_sci(by_method['gradient_adam'])}}}",
+        f"\\providecommand{{\\OffgridPennyLaneMax}}{{{latex_sci(by_method['analytic_poly_to_angles_mapped'])}}}",
+        f"\\providecommand{{\\OffgridChaoMax}}{{{latex_sci(by_method['analytic_chao_laurent_mapped'])}}}",
+        "",
+    ]
+
+
 def higher_degree_blocks(results: Path) -> list[str]:
     lines: list[str] = ["% --- v1.1 higher-degree multi-seed (additive; does not alter legacy macros) ---", ""]
     for degree in HIGHER_MULTI_SEED_DEGREES:
@@ -137,6 +153,7 @@ def higher_degree_blocks(results: Path) -> list[str]:
         if coords or stats:
             lines.extend(coords)
             lines.extend(stats)
+    lines.extend(offgrid_block(results))
     return lines
 
 

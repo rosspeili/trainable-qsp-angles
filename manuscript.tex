@@ -719,6 +719,26 @@ We audited the Chao row against pyqsp's \texttt{sym\_qsp} solver (machine-precis
 \label{fig:baseline}
 \end{figure}
 
+\subsection{Off-Grid Generalization}
+\label{sec:offgrid}
+
+Train and hold-out MSE in Table~\ref{tab:baseline} use fixed uniform grids. To probe generalization between grid points, we draw $n=\OffgridNPoints$ uniform random samples in $[-0.95,0.95]$ that do not coincide with the $64$-point training grid (off-grid seed~42) and report maximum pointwise error $| \langle X\rangle_{\boldsymbol{\phi}}(x) - P_{\mathrm{target}}(x) |$ (Table~\ref{tab:offgrid}). Learned phases achieve off-grid max error $\OffgridLearnedMax$, below mapped analytic baselines ($\OffgridPennyLaneMax$ / $\OffgridChaoMax$) and consistent with the training-grid max error ($3.4\times10^{-2}$ in Table~\ref{tab:baseline} row~1). Source: \texttt{results/paper/offgrid\_random\_d5\_seed0.json} via \texttt{experiments.offgrid\_eval}.
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{@{} l r @{}}
+  \toprule
+  \textbf{Method} & \textbf{Off-grid max error} \\
+  \midrule
+  Gradient Adam (seed 0) & $\OffgridLearnedMax$ \\
+  PennyLane \texttt{poly\_to\_angles} (mapped) & $\OffgridPennyLaneMax$ \\
+  Chao / \texttt{pyqsp} Laurent (mapped) & $\OffgridChaoMax$ \\
+  \bottomrule
+\end{tabular}
+\caption{Random off-grid max pointwise error at $d=5$ ($n=\OffgridNPoints$ samples, domain $[-0.95,0.95]$, excluding train-grid hits).}
+\label{tab:offgrid}
+\end{table}
+
 \subsection{Degree Scaling}
 
 Figure~\ref{fig:scaling} summarizes seed~0 training at odd degrees $\{5,7,9,15,21\}$. Gradient training remains below $10^{-3}$ train MSE through $d=21$ in this protocol; mapped analytic MSE is higher ($\sim10^{-2}$--$10^{-1}$ at moderate $d$), consistent with capitalization and convention residuals (Section~\ref{sec:limitations}).
@@ -851,12 +871,13 @@ The implementation, experiment scripts, audit trail (\texttt{docs/AUDIT\_TRAIL.m
   \item \textbf{Simulation only.} No shot noise, hardware, or transpilation effects.
   \item \textbf{Scaling statistics.} Degree scaling curve (Figure~\ref{fig:scaling}) uses one seed per degree; multi-seed statistics are reported at $d=5$ (Figure~\ref{fig:multiseed}) and $d\in\{7,15\}$ (Section~\ref{sec:multiseed_higher}).
   \item \textbf{Ablation scope.} Hyperparameter ablation (Section~\ref{sec:ablation}) uses seed~0 only; multi-seed stats cover the default protocol at $d=5$.
+  \item \textbf{Off-grid probe.} Section~\ref{sec:offgrid} uses one random off-grid draw (1024 points, seed~42) at $d=5$ only; it is not a hold-out set for hyperparameter tuning.
   \item \textbf{Reference stack.} One PennyLane+JAX implementation; the flat-circuit recipe is portable but not cross-validated on hardware here.
 \end{itemize}
 
 \section{Outlook}
 
-Within the scope of this benchmark, gradient-learned QSP phases are most compelling when the training objective \emph{is} the flat differentiable circuit---for example, QSP blocks inside variational pipelines with implicit targets. Immediate extensions include off-grid generalization tests and optional cross-SDK validation. The combination of interpretable polynomial structure and automatic differentiation remains a practical template for quantum subroutine design when the loss is end-to-end differentiable.
+Within the scope of this benchmark, gradient-learned QSP phases are most compelling when the training objective \emph{is} the flat differentiable circuit---for example, QSP blocks inside variational pipelines with implicit targets. Immediate extensions include optional cross-SDK validation and barren-plateau analysis at higher degree. The combination of interpretable polynomial structure and automatic differentiation remains a practical template for quantum subroutine design when the loss is end-to-end differentiable.
 
 %% ============================================================
 %% (Former extended speculative section condensed into Outlook above.)

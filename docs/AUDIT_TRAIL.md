@@ -21,6 +21,7 @@
 | Manuscript v1.1 reframing | ✅ Done | Benchmark + implementation note scope (AUD-2026-06-12-023) |
 | Multi-seed d=7, d=15 | ✅ Done | `results/t1_degree7/`, `results/t1_degree15/` (30/30 success each) |
 | Chao sym_qsp audit (item 3) | ✅ Done | Native ≲10⁻¹⁵; mapped MSE unchanged vs Laurent |
+| Off-grid random eval (item 4) | ✅ Done | Learned max 2.9×10⁻² vs analytic ~1.8×10⁻¹ |
 
 ---
 
@@ -168,6 +169,15 @@ Source: `results/scaling/scaling_table.csv`
 | **Conclusion** | Gap is convention/capitalization residual, not solver error; paper reports Laurent in main table |
 | **Evidence** | `results/paper/chao_method_comparison_d5.json`, `experiments/compare_chao_methods.py` |
 
+### AUD-026 · fixed · `experiment` · Off-grid random max error (v1.1 item 4)
+
+| | |
+|---|---|
+| **What** | 1024 uniform random $x\in[-0.95,0.95]$ excluding train-grid hits; max $\|P-\langle X\rangle\|$ at $d=5$, seed~0 |
+| **Result** | Learned max $2.9\times10^{-2}$; mapped analytic $\approx1.8\times10^{-1}$ |
+| **How** | `py -3.13 -m experiments.offgrid_eval`; phases from `baseline_comparison_d5.json` (no retrain) |
+| **Evidence** | `results/paper/offgrid_random_d5_seed0.json`, `manuscript_numbers.tex` `\Offgrid*` macros |
+
 ---
 
 ## 3. Test audit
@@ -200,7 +210,7 @@ Source: `results/scaling/scaling_table.csv`
 
 | ID | Issue | Next action |
 |----|-------|-------------|
-| — | v1.1 paper items 4–5 | Off-grid test; barren plateaus discussion |
+| — | v1.1 paper item 5 | Barren plateaus discussion |
 
 ---
 
@@ -231,7 +241,7 @@ For failed experiment runs, always attach:
 
 ## 7. Chronological index (machine log)
 
-Full append-only log: [`audit/LOG.jsonl`](audit/LOG.jsonl) (19 entries as of 2026-06-12).
+Full append-only log: [`audit/LOG.jsonl`](audit/LOG.jsonl) (21 entries as of 2026-06-12).
 
 ```bash
 py -3.13 -m experiments.audit list --last 20
